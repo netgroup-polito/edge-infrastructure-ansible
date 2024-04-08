@@ -1,0 +1,23 @@
+---
+
+- name: Deploy Kubernetes Dashboard
+  hosts: masters
+  gather_facts: true
+  become: true
+  pre_tasks:
+    - name : Get k3s version
+      ansible.builtin.command: k3s --version
+      register: k3s_version_output
+      changed_when: false
+      ignore_errors: true
+
+    - name: Check Kubernetes Dashboard
+      ansible.builtin.command: kubectl get svc kubernetes-dashboard -n kubernetes-dashboard
+      register: dashboard_check_output
+      changed_when: false
+      ignore_errors: true
+      when: k3s_version_output.rc == 0
+
+  roles:
+    - role: dashboard
+      when: k3s_version_output.rc == 0 and dashboard_check_output.rc != 0

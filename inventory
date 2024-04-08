@@ -1,0 +1,10 @@
+[masters]
+#host1 ansible_user=giorgia ansible_ssh_user=giorgia ansible_ssh_host=192.168.1.23 ansible_ssh_private_key_file=~/.ssh/id_rsa
+host1 ansible_user=giorgia ansible_host=192.168.1.23 
+
+[workers]
+
+
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

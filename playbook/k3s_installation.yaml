@@ -1,0 +1,17 @@
+---
+- name: Cluster prep
+  hosts: masters
+  gather_facts: true
+  become: true
+  pre_tasks:
+    - name : Get k3s version
+      ansible.builtin.command: k3s --version
+      register: k3s_version_output
+      changed_when: false
+      ignore_errors: true
+
+  roles:
+    - role: prereq
+      when: k3s_version_output.rc != 0
+    - role: k3s
+      when: k3s_version_output.rc != 0

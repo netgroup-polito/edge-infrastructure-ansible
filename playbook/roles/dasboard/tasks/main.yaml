@@ -1,0 +1,37 @@
+---
+- name: Get {{ ansible_user }} Home Directory
+  register: home_directory
+  shell:
+    cmd: "getent passwd {{ ansible_user }}  | awk -F: '{ print $6 }'"
+
+- name: Deploy Kubernetes Dashboard UI
+  ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+- name: Copy Dashboard spec file
+  ansible.builtin.copy:
+    src: user.yaml
+    dest: "{{ home_directory.stdout }}/dashboard.yaml"
+
+- name: Create Dashboard User and Secret
+  ansible.builtin.command:
+    cmd: "kubectl apply -f {{ home_directory.stdout }}/dashboard.yaml"
+
+- name: Clean up spec File
+  file:
+    path: "{{ home_directory.stdout }}/dashboard.yaml"
+    state: absent
+
+- name: NodePort service
+  ansible.builtin.command:
+    cmd: >
+      kubectl --namespace kubernetes-dashboard patch svc kubernetes-dashboard -p '{"spec": {"type": "NodePort"}}'
+
+- name: Get number of NodePort
+  ansible.builtin.command:
+    cmd: >
+      kubectl --namespace kubernetes-dashboard get svc kubernetes-dashboard -o=jsonpath="{.spec.ports[0].nodePort}"
+  register: port_output
+
+- name: Display the port number
+  ansible.builtin.debug:
+    msg: "The NodePort number is {{ port_output.stdout }}"
