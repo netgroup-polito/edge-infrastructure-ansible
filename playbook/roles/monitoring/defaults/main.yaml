@@ -1,0 +1,4 @@
+---
+helm:
+  prometheus_release_name: prometheus
+  kepler_release_name: kepler

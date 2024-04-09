@@ -1,0 +1,42 @@
+- name: Check if kepler is already installed
+  shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml status {{ helm.kepler_release_name }} -n monitoring
+  register: helm_kepler_exists_result
+  ignore_errors: true
+
+- name: Add keplergl Helm repository
+  shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml repo add {{ helm.kepler_release_name }} https://sustainable-computing-io.github.io/kepler-helm-chart
+  when: helm_kepler_exists_result.rc != 0
+
+- name: Update keplergl Helm repository
+  shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml repo update
+  when: helm_kepler_exists_result.rc != 0
+
+- name: Install kepler
+  shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml install {{ helm.kepler_release_name }} kepler/kepler -n monitoring --set serviceMonitor.enabled=true --set serviceMonitor.labels.release=prometheus
+  when: helm_kepler_exists_result.rc != 0
+
+- name: Import grafana dashboard json (0/4)
+  ansible.builtin.copy:
+    src: kepler_dashboard.json
+    dest: "./kepler_dashboard.json"
+  when: helm_kepler_exists_result.rc != 0
+
+- name: Install kepler dashboard (1/4)
+  shell: kubectl get pod -l app.kubernetes.io/name=kepler -o jsonpath="{.items[0].metadata.name}" -n monitoring
+  register: kepler_pod
+  when: helm_kepler_exists_result.rc != 0
+
+- name: Install kepler dashboard (2/4)
+  shell: kubectl wait --for=condition=Ready pod {{ kepler_pod.stdout }} --timeout=-1s -n monitoring
+  when: helm_kepler_exists_result.rc != 0
+
+- name: Install kepler dashboard (3/4)
+  shell: kubectl get pod -n monitoring -l app.kubernetes.io/name=grafana -o jsonpath="{.items[0].metadata.name}"
+  register: grafana_pod
+  when: helm_kepler_exists_result.rc != 0
+
+- name: Install kepler dashboard (4/4)
+  shell: kubectl cp kepler_dashboard.json monitoring/{{ grafana_pod.stdout }}:/tmp/dashboards/kepler_dashboard.json
+  when: helm_kepler_exists_result.rc != 0
+
+  
