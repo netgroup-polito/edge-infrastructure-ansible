@@ -10,13 +10,13 @@
         src: "/etc/rancher/k3s/k3s.yaml"
         dest: "/tmp/k3s.yaml"
         flat: yes
-      delegate_to: remote_node # Sostituire con l'alias corretto del tuo nodo remoto definito nell'inventario
+      delegate_to: remote_node # Replace with the correct alias of your remote node defined in the inventory
 
     - name: Replace localhost with remote IP in kubeconfig
       replace:
         path: "/tmp/k3s.yaml"
         regexp: 'https://127.0.0.1:6443'
-        replace: 'https://130.192.225.118:6443' # Assicurati di usare 'https://' se necessario
+        replace: 'https://130.192.225.118:6443' # Make sure to use 'https://' if necessary
 
     - name: Replace default with remote in kubeconfig
       replace:
