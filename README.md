@@ -14,19 +14,19 @@ This repository contains the Ansible playbooks and roles to deploy the edge infr
 ## Verify your Inventory
 
 ```bash
-ansible-inventory -i Ansible/Inventory/inventory.ini --list
+ansible-inventory -i inventory --list
 ```
 
 ## Ping the myhosts group in your inventory
 
 ```bash
-ansible myhosts -m ping -i Ansible/Inventory/inventory.ini
+ansible myhosts -m ping -i inventory
 ```
 
 ## DDNS Setup
 
 ```bash
-ansible-playbook Ansible/Playbook/ddns-setup.yaml -i Ansible/Inventory/inventory.ini
+ansible-playbook playbook/ddns-setup.yaml -i inventory.ini
 ```
 
 ## Setup the environment and deploy the dashboard
