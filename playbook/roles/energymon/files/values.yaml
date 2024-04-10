@@ -1,0 +1,32 @@
+grafana:
+  enabled: true
+  namespaceOverride: ""
+  defaultDashboardsEnabled: true
+  adminPassword: prom-operator
+  ingress:
+    ## If true, Grafana Ingress will be created
+    ##
+    enabled: true
+    ## Annotations for Grafana Ingress
+    ##
+    ingressClassName: traefik # This field is required in order for traefik to pickup ingress!
+
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+
+    ## Labels to be added to the Ingress
+    ##
+    labels: {}
+
+    ## Hostnames.
+    ## Must be provided if Ingress is enable.
+    ##
+    # hosts:
+    #   - grafana.domain.com
+    hosts:
+      - grafana.domain.com
+
+    ## Path for grafana ingress
+    path: /grafana

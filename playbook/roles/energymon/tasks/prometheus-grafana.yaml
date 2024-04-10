@@ -1,0 +1,43 @@
+
+- name: Check if prometheus and grafana are already installed
+  shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml status {{ helm.prometheus_release_name }} -n monitoring
+  register: helm_prometheus_exists_result
+  ignore_errors: true
+
+- name: Create monitoring Namespace
+  ansible.builtin.copy:
+    src: namespace.yaml
+    dest: "./namespace.yaml"
+  when: helm_prometheus_exists_result.rc != 0 
+
+- name: Install helm prometheus-community repo
+  shell: kubectl apply -f namespace.yaml
+  when: helm_prometheus_exists_result.rc != 0
+
+- name: Clean namespace file
+  file: 
+    path: namespace.yaml 
+    state: absent
+
+- name: Install helm prometheus-community repo
+  shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  when: helm_prometheus_exists_result.rc != 0
+
+- name: Update helm prometheus-community repo
+  shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml repo update
+  when: helm_prometheus_exists_result.rc != 0
+
+- name: Copy grafana helm values yaml
+  ansible.builtin.copy:
+    src: values.yaml
+    dest: "./values.yaml"
+  when: helm_prometheus_exists_result.rc != 0
+
+- name: Helm {{ helm.prometheus_release_name }} release 
+  shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml install -f values.yaml {{ helm.prometheus_release_name }} prometheus-community/kube-prometheus-stack -n monitoring
+  when: helm_prometheus_exists_result.rc != 0
+
+- name: Clean helm file
+  file: 
+    path: values.yaml 
+    state: absent
