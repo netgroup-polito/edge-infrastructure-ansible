@@ -1,0 +1,45 @@
+---
+- name: Transfer kubeconfig from remote to local and prepare it
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Fetch kubeconfig from remote node
+      ansible.builtin.fetch:
+        src: "/etc/rancher/k3s/k3s.yaml"
+        dest: "/tmp/k3s.yaml"
+        flat: yes
+      delegate_to: remote_node # Sostituire con l'alias corretto del tuo nodo remoto definito nell'inventario
+
+    - name: Replace localhost with remote IP in kubeconfig
+      replace:
+        path: "/tmp/k3s.yaml"
+        regexp: 'https://127.0.0.1:6443'
+        replace: 'https://130.192.225.118:6443' # Assicurati di usare 'https://' se necessario
+
+    - name: Replace default with remote in kubeconfig
+      replace:
+        path: "/tmp/k3s.yaml"
+        regexp: 'default'
+        replace: 'remote'
+
+- name: Transfer modified kubeconfig to remote node
+  hosts: local_node
+  tasks:
+
+    - name: Copy modified kubeconfig to remote node
+      copy:
+        src: "/tmp/k3s.yaml"
+        dest: "/tmp/k3s.yaml"
+        remote_src: no
+
+    - name: Merge kubeconfig files
+      shell: |
+            KUBECONFIG=/tmp/k3s.yaml:/etc/rancher/k3s/k3s.yaml kubectl config view --flatten > /tmp/merged_kubeconfig.yaml
+            sudo mv /tmp/merged_kubeconfig.yaml /etc/rancher/k3s/merged_kubeconfig.yaml
+
+    - name: In-band control peering
+      shell: | 
+            export KUBECONFIG=/etc/rancher/k3s/merged_kubeconfig.yaml
+            liqoctl peer in-band --context=default --remote-context=remote
