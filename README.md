@@ -11,25 +11,35 @@ Per recuperare il token per la dashboard dal mini-pc:
 kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 ```
 
-# Monitoring
-Il role ```monitoring``` si occupa di installare e configurare la parte di monitoraggio.
-Questo ruolo parte subito dopo la creazione del cluster k3s.
-In ordine si occuperà di:
+# Energy monitoring
+The ```energymon``` role is responsible for installing and configuring the monitoring part.
+This role starts immediately after the creation of the k3s cluster.
+In order, it will:
 
-1. Controllare su curl è installato (ed installarlo eventualmente)
-1. Installare helm (se non presente)
-1. Installare Prometheus e Grafana (se non presente)
-1. Installare Kepler (con annessa dashboard per Grafana) (se non presente)
+1. Check if curl is installed (and install it if necessary)
+1. Install helm (if not present)
+1. Install Prometheus and Grafana (if not present)
+1. Install Kepler (with attached Grafana dashboard) (if not present)
 
-In assenza di ingress per grafana, è possibile esporre ed accedere a grafana tramite nodeport con il seguente comando:
+In the absence of an ingress for grafana, it is possible to expose and access grafana via nodeport with the following command:
 
 ```sudo kubectl expose service prometheus-grafana --type=NodePort --name=grafana-ext --target-port=3000 -n monitoring```
 
 ### Grafana configuration
 
-La configurazione di grafana è situata in ```playbook/roles/monitoring/files/values.yaml``` dove la password dello user ```admin``` è settata tramite l'attributo ```adminPassword```.
+The Grafana configuration is located in ```playbook/roles/energymon/files/values.yaml``` where the password of the ```admin``` user is set via the ```adminPassword``` attribute.
 
-Se la configurazione non viene modificata, è possibile accedere a grafana con le seguenti credenziali:
+If the configuration is not modified, it is possible to access grafana with the following credentials:
 
 - user: ```admin```
 - password: ```prom-operator```
+
+### Tips for Re-Installation
+
+To reinstall a specific component, such as Kepler or Prometheus+Grafana, simply uninstall the corresponding Helm release from the target host using the following command:
+
+```sudo helm --kubeconfig /etc/rancher/k3s/k3s.yaml uninstall <release_name> -n monitoring```
+
+The release name can be found and configured in the config file located at ```playbook/roles/energymon/defaults/main.yaml```.
+
+After successfully uninstalling the release, relaunch the ansible script. The script will detect the missing part and proceed with the installation.
