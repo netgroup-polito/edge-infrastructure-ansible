@@ -44,3 +44,9 @@ Per recuperare il token per la dashboard dal mini-pc:
 ```bash
 kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 ```
+
+## Liqo Peering
+
+```bash
+ansible-playbook playbook/liqo-peering.yaml -i inventory
+```
