@@ -1,0 +1,35 @@
+---
+# -----------------------------
+# This Ansible playbook consists of three main tasks:
+#
+#   The first task, "Copy modified kubeconfig to remote node", 
+#   uses the copy module to copy the modified Kubernetes configuration file (kubeconfig) 
+#   from the local machine (Ansible control node) to the local node. The file is copied from "/tmp/k3s.yaml" on the local machine  
+#   to "/tmp/k3s.yaml" on the local node.
+# 
+#   The second task, "Merge kubeconfig files", 
+#   uses the shell module to execute a series of shell commands. 
+#   These commands merge the kubeconfig file at "/tmp/k3s.yaml" with the one at "/etc/rancher/k3s/k3s.yaml" and output the result to "/tmp/merged_kubeconfig.yaml". 
+#   The merged file is then moved to "/etc/rancher/k3s/merged_kubeconfig.yaml".
+#
+#   The third task, "In-band control peering", also uses the shell module to execute a series of shell commands. 
+#   These commands set the KUBECONFIG environment variable to the path of the merged kubeconfig file
+#   and then execute the liqoctl peer in-band command with the "--context=default" and "--remote-context=remote" options. 
+#   This is done to establish a peering relationship between the local Kubernetes cluster and the remote one.
+# -----------------------------
+
+    - name: Copy modified kubeconfig to remote node
+      copy:
+        src: "/tmp/k3s.yaml"
+        dest: "/tmp/k3s.yaml"
+        remote_src: no
+
+    - name: Merge kubeconfig files
+      shell: |
+            KUBECONFIG=/tmp/k3s.yaml:/etc/rancher/k3s/k3s.yaml kubectl config view --flatten > /tmp/merged_kubeconfig.yaml
+            sudo mv /tmp/merged_kubeconfig.yaml /etc/rancher/k3s/merged_kubeconfig.yaml
+
+    - name: In-band control peering
+      shell: | 
+            export KUBECONFIG=/etc/rancher/k3s/merged_kubeconfig.yaml
+            liqoctl peer in-band --context=default --remote-context=remote

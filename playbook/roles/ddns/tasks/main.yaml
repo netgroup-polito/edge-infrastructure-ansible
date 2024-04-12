@@ -1,17 +1,20 @@
 ---
-- name: ddns-updater setup
-  hosts: ddns
-  become: true
-  vars:
-    container_count: 4
-    default_container_name: docker
-    default_container_image: ubuntu
-    default_container_command: sleep 1d
-    data_directory: /ddns/data
-    ddns_image: qmcgaw/ddns-updater
-    ddns_port: 8000
+# -----------------------------
+# This Ansible playbook consists of three main tasks:
+#
+#   The first tasks are related to the installation of Docker and all its dependencies.
+#  
+#   "Pull DDNS Updater Docker image": This task pulls the Docker image for the DDNS Updater.
+#
+#   "Create data directory": This task creates a directory specified by the variable data_directory.
+#
+#   "Create config.json in data directory": This task creates a config.json file in the data directory with specific content,
+#   This file should be modified based on the DDNS provider used and the specific configuration of your domain.
+#
+#   "Run DDNS Updater container": This task runs a Docker container for the DDNS Updater, 
+#    mapping the specified port and volume, and setting the restart policy to always.
+# -----------------------------
 
-  tasks:
     - name: Install aptitude
       apt:
         name: aptitude
@@ -84,11 +87,11 @@
           {
               "settings": [
                   {
-                      "provider": "noip",
-                      "domain": "myhomecloudproxmox.ddns.net",
+                      "provider": "{{ ddns_provider }}",
+                      "domain": "{{ ddns_domain }}",
                       "host": "@",
-                      "username": "andrew64bit",
-                      "password": "DeepLearningNoip16082000",
+                      "username": "{{ ddns_username }}",
+                      "password": "{{ ddns_password }}",
                       "ip_version": "ipv4",
                       "ipv6_suffix": "",
                       "provider_ip": true
