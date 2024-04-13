@@ -24,10 +24,10 @@
       when: k3s_version_output.rc != 0
     - role: k3s
       when: k3s_version_output.rc != 0
-    - role: liqo
+    - role: liqo-setup
 
 - name: DDNS updater setup
-  hosts: ddns
+  hosts: local_node
   become: true
 
   roles:

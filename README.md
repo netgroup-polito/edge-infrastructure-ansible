@@ -4,8 +4,14 @@ This repository contains the Ansible playbooks and roles to deploy the edge infr
 
 ## Requirements
 
-- The operative system of the VMs created in the mini-pc was Ubuntu 22.04, we do not guarantee the correct execution of the playbooks on other operative systems.
+- Ansible collections:
+    - community.kubernetes 
 
+It can be installed using the following command:
+
+```bash
+ansible-galaxy collection install community.kubernetes
+```
 
 
 ## NOTICE: 
@@ -32,11 +38,11 @@ ansible-playbook playbook/ddns-setup.yaml -i inventory.ini
 ## Setup the environment and deploy the dashboard
 
 ```bash
-ansible-playbook --ask-become-pass playbook/env-setup.yaml.yaml -i inventory
+ansible-playbook playbook/env_setup.yaml -i inventory
 ```
 
 ```bash
-ansible-playbook --ask-become-pass playbook/dashboard_deploy.yaml -i inventory
+ansible-playbook playbook/dashboard_deploy.yaml -i inventory
 ```
 
 Per recuperare il token per la dashboard dal mini-pc:

@@ -1,84 +1,49 @@
 ---
 # -----------------------------
-# This Ansible playbook consists of three main tasks:
+# This Ansible playbook consists of several tasks:
 #
-#   The first tasks are related to the installation of Docker and all its dependencies.
-#  
-#   "Pull DDNS Updater Docker image": This task pulls the Docker image for the DDNS Updater.
+#   "Install required system packages": 
+#   This task installs the latest versions of python3-pip, virtualenv, and python3-setuptools using the apt module.
 #
-#   "Create data directory": This task creates a directory specified by the variable data_directory.
+#   "Install Kubernetes Python module": 
+#   This task uses the pip module to install the Kubernetes Python module, which allows Python scripts to interact with Kubernetes.
 #
-#   "Create config.json in data directory": This task creates a config.json file in the data directory with specific content,
-#   This file should be modified based on the DDNS provider used and the specific configuration of your domain.
+#   "Create data directory on host": 
+#   This task creates a directory specified by the variable data_directory on the host machine.
 #
-#   "Run DDNS Updater container": This task runs a Docker container for the DDNS Updater, 
-#    mapping the specified port and volume, and setting the restart policy to always.
+#   "Create config.json in data directory": 
+#   This task creates a config.json file in the data directory with specific content. 
+#   The content includes settings for a DDNS provider, domain, host, username, password, IP version, and provider IP.
+# 
+#   "Create DDNS Updater Kubernetes deployment": 
+#   This task uses the community.kubernetes.k8s module to create a Kubernetes Deployment for the DDNS Updater. 
+#   The Deployment consists of a single replica of a container running the image specified by the ddns_image variable. 
+#   The container exposes port 8000 and mounts a volume from the host machine's data directory.
+#
+#   "Expose DDNS Updater via a service": 
+#   This task uses the community.kubernetes.k8s module to create a Kubernetes Service that exposes the DDNS Updater Deployment. 
+#   The Service is of type NodePort and maps the container's port 8000 to the node's port 30080.
 # -----------------------------
-
-    - name: Install aptitude
-      apt:
-        name: aptitude
-        state: latest
-        update_cache: true
-
     - name: Install required system packages
       apt:
         pkg:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - software-properties-common
           - python3-pip
           - virtualenv
           - python3-setuptools
         state: latest
         update_cache: true
 
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu jammy stable
-        state: present
-
-    - name: Update apt and install docker-ce
-      apt:
-        name: docker-ce
-        state: latest
-        update_cache: true
-
-    - name: Install Docker Module for Python
+    - name: Install Kubernetes Python module
       pip:
-        name: docker
+        name: kubernetes
 
-    - name: Pull default Docker image
-      community.docker.docker_image:
-        name: "{{ default_container_image }}"
-        source: pull
-
-    - name: Create default containers
-      community.docker.docker_container:
-        name: "{{ default_container_name }}{{ item }}"
-        image: "{{ default_container_image }}"
-        command: "{{ default_container_command }}"
-        state: present
-      with_sequence: count={{ container_count }}
-
-    - name: Pull DDNS Updater Docker image
-      community.docker.docker_image:
-        name: "{{ ddns_image }}"
-        source: pull
-
-    - name: Create data directory
+    - name: Create data directory on host
       file:
         path: "{{ data_directory }}"
         state: directory
-        mode: 0777
-        owner: 1000
-        group: 1000
+        mode: 0770
+        owner: root
+        group: root
 
     - name: Create config.json in data directory
       copy:
@@ -98,15 +63,59 @@
                   }
               ]
           }
-        mode: 0777
+        mode: 0644
+        owner: root
+        group: root
 
-    - name: Run DDNS Updater container
-      community.docker.docker_container:
-        name: ddns-updater
-        image: "{{ ddns_image }}"
-        ports:
-          - "{{ ddns_port }}:8000"
-        volumes:
-          - "{{ data_directory }}:/updater/data"
-        state: started
-        restart_policy: always
+    - name: Create DDNS Updater Kubernetes deployment
+      community.kubernetes.k8s:
+        kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ddns-updater
+            namespace: default
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: ddns-updater
+            template:
+              metadata:
+                labels:
+                  app: ddns-updater
+              spec:
+                containers:
+                - name: ddns-updater
+                  image: "{{ ddns_image }}"
+                  ports:
+                  - containerPort: 8000
+                  volumeMounts:
+                  - name: data
+                    mountPath: "/updater/data"
+                volumes:
+                - name: data
+                  hostPath:
+                    path: "{{ data_directory }}"
+                    type: Directory
+
+    - name: Expose DDNS Updater via a service
+      community.kubernetes.k8s:
+        kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ddns-updater
+            namespace: default
+          spec:
+            type: NodePort
+            ports:
+            - port: 8000
+              nodePort: 30080
+              protocol: TCP
+            selector:
+              app: ddns-updater
