@@ -5,8 +5,6 @@
 # 
 # [myhosts] is a group that contains all the hosts that we want to manage with Liqo in order to perform the peering.
 # local_node is the host where we are running the Liqo control plane.
-#
-# [ddns] is a group containing the host that we want to use as a DDNS updater.
 # -----------------------------
 
 [myhosts]

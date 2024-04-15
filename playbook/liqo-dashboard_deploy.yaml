@@ -1,0 +1,6 @@
+---
+- name: Install and Access LiqoDash
+  hosts: local_node
+  become: yes 
+  roles:
+    - role: liqo-dashboard
