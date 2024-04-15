@@ -1,11 +1,11 @@
 # Creating Kubernetes cluster using K3s with Ansible
 
 ## Requirements
-The control node need **Ansible** to start the playbooks. 
+The control node needs **Ansible** to start the playbooks. 
 
-It is reccomended to disable swap and firewall on the managed node. If firewall is enable the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
+It is reccomended to disable swap and firewall on the managed node. If the firewall is enabled, the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
 ## Usage 
-To start the playbooks the **inventory** file need to be modified to be consistent with your cluster setup. 
+To start the playbooks, you need to modify the **inventory** file in order to be consistent with your cluster setup. 
 
 Start the creation of Kubernetes cluster using the following command:
 ```bash
@@ -24,7 +24,7 @@ To retrieve the token run the following command:
 sudo kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 ```
 
-The Dashboard can be reached through a **NodePort service**. The ```dashboard``` role handles the conifguration of a NodePort service.
+The Dashboard can be reached through a **NodePort service**. The ```dashboard``` role handles the configuration of a NodePort service.
 To retrieve the NodePort run the following command:
 ```bash
 sudo kubectl --namespace kubernetes-dashboard get svc kubernetes-dashboard -o=jsonpath="{.spec.ports[0].nodePort}"
