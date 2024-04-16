@@ -1,58 +1,66 @@
-# Edge Infrastructure Ansible
+# Cloud Continuum
 
-This repository contains the Ansible playbooks and roles to deploy the edge infrastructure on the mini-pc and the edge server.
+Cloud Continuum is a project aimed at seamlessly connecting home resources with cloud services, creating a unified virtual space for resources and services across domestic servers and cloud providers. This initiative enables fluid resource allocation, enhanced data redundancy, and ease of maintenance and monitoring of applications.
 
-## Requirements
+## Project Overview
 
-- Ansible collections:
-    - community.kubernetes 
+The project adopts the "cloud continuum" paradigm, similar to that in the FLUIDOS European Project. It leverages technologies like Kubernetes and Liqo to facilitate cloud bursting and data redundancy, making it possible for services and data to be processed and stored either locally or in the cloud based on defined policies.
 
-It can be installed using the following command:
+## Key Features
 
-```bash
-ansible-galaxy collection install community.kubernetes
-```
+- **Seamless Resource Scaling:** Automatic scaling between local and cloud resources based on demand.
+- **Data Redundancy:** Ensures data safety through local and remote replication.
+- **Simplified Management:** A minimal dashboard for easy edge-to-cloud interactions.
+- **Flexibility and Control:** Customize where applications run and where data is stored.
+
+## Technologies
+
+- **Docker**
+- **Kubernetes** (specifically K3d)
+- **Bash**
+- Programming in **Go**, **JavaScript**, and frameworks like **React** may be needed for further development.
+
+## Getting Started
+
+To get started with the Cloud Continuum project, follow these initial setup steps:
+
+### Prerequisites
+
+- Docker and Kubernetes must be installed on your system.
+- Basic knowledge of Bash and Ansible scripting is recommended.
+
+### Installation Steps
+
+1. **Set up Kubernetes using Liqo:**
+
+    ```yaml
+    - name: Download and extract liqoctl
+      shell: 'curl --fail -LS "https://github.com/liqotech/liqo/releases/download/v0.10.2/liqoctl-linux-amd64.tar.gz" | tar -xz'
+
+    - name: Install liqoctl
+      shell: 'sudo install -o root -g root -m 0755 liqoctl /usr/local/bin/liqoctl'
+
+    - name: Install Liqo       
+      shell: 'sudo liqoctl install k3s --kubeconfig=/etc/rancher/k3s/k3s.yaml'
+    ```
+
+2. **Configure Liqo Peering:**
+
+    Complete the steps in `liqo-peering.yaml` to set up and configure the peering between your local and remote Kubernetes clusters.
+
+### Configuration
+
+Adjust the configuration settings according to your environment and security policies. Check the provided Ansible playbooks (`liqo-setup`, `liqo-part-1`, and `liqo-part-2`) for more details on configuring your deployment.
+
+## Contributing
+
+Contributions to Cloud Continuum are welcome! Please refer to the `CONTRIBUTING.md` for guidelines on how to contribute to this project.
+
+## License
 
 
-## NOTICE: 
-**The users used in the two machine should have root privileges in order to work properly**
+## Acknowledgments
 
-## Verify your Inventory
-
-```bash
-ansible-inventory -i inventory --list
-```
-
-## Ping the myhosts group in your inventory
-
-```bash
-ansible myhosts -m ping -i inventory
-```
-
-## DDNS Setup
-
-```bash
-ansible-playbook playbook/ddns-setup.yaml -i inventory.ini
-```
-
-## Setup the environment and deploy the dashboard
-
-```bash
-ansible-playbook playbook/env_setup.yaml -i inventory
-```
-
-```bash
-ansible-playbook playbook/dashboard_deploy.yaml -i inventory
-```
-
-Per recuperare il token per la dashboard dal mini-pc:
-
-```bash
-kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
-```
-
-## Liqo Peering
-
-```bash
-ansible-playbook playbook/liqo-peering.yaml -i inventory
-```
+- Inspired by projects like casaos.io.
+- Utilizes technologies developed in the FLUIDOS European Project.
+- Thanks to the Kubernetes community and the developers of Liqo.
