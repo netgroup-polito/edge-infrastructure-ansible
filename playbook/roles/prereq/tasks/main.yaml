@@ -22,7 +22,7 @@
         var: ufw_status
 
     - name: If ufw enabled, open api port
-      when: ufw_status['stdout'] == "Stato':'' attivo"
+      when: ufw_status.stdout | regex_search('attivo')
       community.general.ufw:
         rule: allow
         port: "{{ api_port }}"

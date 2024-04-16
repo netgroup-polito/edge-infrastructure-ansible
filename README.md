@@ -1,14 +1,33 @@
-# ansible_project_k3s
-Per eseguirlo:
+# Creating Kubernetes cluster using K3s with Ansible
+
+## Requirements
+The control node needs **Ansible** to start the playbooks. 
+
+It is reccomended to disable swap and firewall on the managed node. If the firewall is enabled, the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
+## Usage 
+To start the playbooks, you need to modify the **inventory** file in order to be consistent with your cluster setup. 
+
+Start the creation of Kubernetes cluster using the following command:
 ```bash
 ansible-playbook --ask-become-pass playbook/k3s_installation.yaml -i inventory
 ```
+
+## Kubernetes Dashboard
+An optional playbook is provided to deploy and access Kubernetes Dashboard within the K3s cluster. To use it run the following command:
 ```bash
-ansible-playbook --ask-become-pass playbook/dashboard_deploy.yaml -i inventory
+ansible-playbook --ask-become-pass playbook/dashboard_deploy.yaml -i inventory   ⁠
 ```
-Per recuperare il token per la dashboard dal mini-pc: 
+
+To access the Dashboard a **token** is needed. The ```dashboard``` role handles the creation of a long-lived Bearer Token.
+To retrieve the token run the following command:
 ```bash
-kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
+sudo kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
+```
+
+The Dashboard can be reached through a **NodePort service**. The ```dashboard``` role handles the configuration of a NodePort service.
+To retrieve the NodePort run the following command:
+```bash
+sudo kubectl --namespace kubernetes-dashboard get svc kubernetes-dashboard -o=jsonpath="{.spec.ports[0].nodePort}"
 ```
 
 # Energy monitoring
