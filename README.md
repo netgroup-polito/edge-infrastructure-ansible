@@ -16,7 +16,7 @@ The project adopts the "cloud continuum" paradigm, similar to that in the FLUIDO
 ## Technologies
 
 - **Docker**
-- **Kubernetes** (specifically K3d)
+- **Kubernetes** (specifically K3s)
 - **Bash**
 - Programming in **Go**, **JavaScript**, and frameworks like **React** may be needed for further development.
 
@@ -26,41 +26,56 @@ To get started with the Cloud Continuum project, follow these initial setup step
 
 ### Prerequisites
 
-- Docker and Kubernetes must be installed on your system.
 - Basic knowledge of Bash and Ansible scripting is recommended.
 
-### Installation Steps
+### Environment Setup
 
-1. **Set up Kubernetes using Liqo:**
+ This Ansible playbook setup the environment:
 
-    ```yaml
-    - name: Download and extract liqoctl
-      shell: 'curl --fail -LS "https://github.com/liqotech/liqo/releases/download/v0.10.2/liqoctl-linux-amd64.tar.gz" | tar -xz'
+ • Installation of K3S and Liqo on the local node and remote node (myhosts)
 
-    - name: Install liqoctl
-      shell: 'sudo install -o root -g root -m 0755 liqoctl /usr/local/bin/liqoctl'
+ • Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file roles/ddns/vars/main.yaml.
 
-    - name: Install Liqo       
-      shell: 'sudo liqoctl install k3s --kubeconfig=/etc/rancher/k3s/k3s.yaml'
-    ```
 
-2. **Configure Liqo Peering:**
+```bash
+ansible-playbook playbook/env-setup.yaml -i inventory
+```
 
-    Complete the steps in `liqo-peering.yaml` to set up and configure the peering between your local and remote Kubernetes clusters.
+### K3s Dashboard Installation
 
-### Configuration
+This Ansible playbook installs K3s on the local node and remote node (myhosts).
 
-Adjust the configuration settings according to your environment and security policies. Check the provided Ansible playbooks (`liqo-setup`, `liqo-part-1`, and `liqo-part-2`) for more details on configuring your deployment.
+```bash
+ansible-playbook playbook/k3s-dashboard_deploy.yaml -i inventory
+```
 
-## Contributing
+### Liqo Dashboard Installation
 
-Contributions to Cloud Continuum are welcome! Please refer to the `CONTRIBUTING.md` for guidelines on how to contribute to this project.
+This Ansible playbook installs Liqo Dashboard on the local node.
+
+```bash
+ansible-playbook playbook/liqo-dashboard_deploy.yaml -i inventory
+```
+
+### Liqo In-Band Peering
+
+These Ansible playbooks perform the in-band peering between the two clusters (myhosts).
+
+1. Liqo peering from the local node to the central cluster
+
+```bash
+ansible-playbook playbook/liqo_peering_in.yaml -i inventory
+```
+
+2. Liqo peering from the central cluster to the local node
+
+```bash
+ansible-playbook playbook/liqo_peering_out.yaml -i inventory
+```
 
 ## License
 
 
 ## Acknowledgments
 
-- Inspired by projects like casaos.io.
-- Utilizes technologies developed in the FLUIDOS European Project.
 - Thanks to the Kubernetes community and the developers of Liqo.
