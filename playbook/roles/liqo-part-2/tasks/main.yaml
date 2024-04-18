@@ -29,7 +29,6 @@
             KUBECONFIG=/tmp/k3s.yaml:/etc/rancher/k3s/k3s.yaml kubectl config view --flatten > /tmp/merged_kubeconfig.yaml
             sudo mv /tmp/merged_kubeconfig.yaml /etc/rancher/k3s/merged_kubeconfig.yaml
 
-    - name: In-band control peering
-      shell: | 
-            export KUBECONFIG=/etc/rancher/k3s/merged_kubeconfig.yaml
-            liqoctl peer in-band --context=default --remote-context=remote
+    - name: Switch default context
+      shell: |
+        sudo kubectl config use-context default

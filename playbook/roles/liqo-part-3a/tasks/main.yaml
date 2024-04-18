@@ -1,0 +1,8 @@
+---
+#
+# in-band peering from the local node to the local node
+#
+    - name: In-band control peering
+      shell: | 
+            export KUBECONFIG=/etc/rancher/k3s/merged_kubeconfig.yaml
+            liqoctl peer in-band --context=default --remote-context=remote

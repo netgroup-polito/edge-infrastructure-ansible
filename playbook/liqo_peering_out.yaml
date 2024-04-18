@@ -2,7 +2,7 @@
 # -----------------------------
 # This playbook transfer thekubeconfig file from the remote node to the local node.
 # It creates a merged kubeconfig file in order to export the context of both local and remote clusters.
-# Finally, it perform the in-band peering.
+# Finally, it perform the in-band peering from the central cluster to the local node.
 # -----------------------------
 
 - name: Transfer kubeconfig from remote to local and prepare it
@@ -17,3 +17,4 @@
 
   roles:
     - role: liqo-part-2
+    - role: liqo-part-3b
