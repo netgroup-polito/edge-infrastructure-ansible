@@ -1,0 +1,8 @@
+- name: Download and extract liqoctl
+  shell: 'curl --fail -LS "https://github.com/liqotech/liqo/releases/download/v0.10.2/liqoctl-linux-amd64.tar.gz" | tar -xz'
+
+- name: Install liqoctl
+  shell: 'sudo install -o root -g root -m 0755 liqoctl /usr/local/bin/liqoctl'
+
+- name: Install Liqo       
+  shell: 'sudo liqoctl install k3s --kubeconfig=/etc/rancher/k3s/k3s.yaml' 

@@ -1,0 +1,13 @@
+---
+
+container_count: 4
+default_container_name: docker
+default_container_image: ubuntu
+default_container_command: sleep 1d
+data_directory: /ddns/data
+ddns_image: qmcgaw/ddns-updater
+ddns_port: 8000
+ddns_provider: noip
+ddns_domain: myhomecloudproxmox.ddns.net
+ddns_username: andrew64bit
+ddns_password: DeepLearningNoip16082000
