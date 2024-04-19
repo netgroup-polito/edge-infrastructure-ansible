@@ -15,7 +15,7 @@ ansible-playbook --ask-become-pass playbook/env_setup.yaml -i inventory
 ## Kubernetes Dashboard
 An optional playbook is provided to deploy and access Kubernetes Dashboard within the K3s cluster. To use it run the following command:
 ```bash
-ansible-playbook --ask-become-pass playbook/dashboard_deploy.yaml -i inventory   ⁠
+ansible-playbook --ask-become-pass playbook/k3s-dashboard_deploy.yaml -i inventory   ⁠
 ```
 
 To access the Dashboard a **token** is needed. The ```dashboard``` role handles the creation of a long-lived Bearer Token.
