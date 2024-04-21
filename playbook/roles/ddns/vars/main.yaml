@@ -1,5 +1,9 @@
 ---
-
+# -----------------------------
+#
+# Visit the github repository "qmcgaw/ddns-updater" to configure based on your DDNS provider.
+#
+# -----------------------------
 container_count: 4
 default_container_name: docker
 default_container_image: ubuntu
@@ -8,6 +12,6 @@ data_directory: /ddns/data
 ddns_image: qmcgaw/ddns-updater
 ddns_port: 8000
 ddns_provider: noip
-ddns_domain: myhomecloudproxmox.ddns.net
-ddns_username: andrew64bit
-ddns_password: DeepLearningNoip16082000
+ddns_domain: <ddns_domain>
+ddns_username: <ddns_username>
+ddns_password: <ddns_password>
