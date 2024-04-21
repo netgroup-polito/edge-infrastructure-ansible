@@ -9,7 +9,14 @@ cat << "EOF"
 
 EOF
 
+#######################################
+#   STEP 0: CHECK SUDO PRIVILEGES     #
+#######################################
 
+if [ "$EUID" -ne 0 ]
+  then echo "This script need sudo privileges, please run: sudo ./$(basename $0)"
+  exit
+fi
 
 echo "K3S cluster setup started"
 echo ""

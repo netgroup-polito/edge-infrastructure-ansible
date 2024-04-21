@@ -9,4 +9,12 @@ The script will perform the following tasks:
 3. Clone Ansible GIT repository
 4. Start Ansible script
 
+## How to run
 
+This script need sudo privileges to be run.
+
+Add execution permission:
+``` chmod +x setup.sh ```
+
+Run:
+``` sudo ./setup.sh ```
