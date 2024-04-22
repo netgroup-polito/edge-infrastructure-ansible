@@ -1,6 +1,8 @@
-# Installation script
+# Installation script for the edge computer
 
-This folder contains a script that is useful for the installation of the k3s cluster locally with just one command.
+This folder contains a script that installs all the commands and software required for a local computer to join the edge infrastructure defined by the FLUIDOS and LEGGERO projects.
+This script must be executed when the computer running at the edge is started from the first time. Additional customization tasks can be carried out later, from a remote administrator, thanks to the management user created in this step.
+In the end, this PC will become a mini-K3s cluster, with the possibility to offload jobs in the cloud thanks to Liqo.
 
 The script will perform the following tasks:
 1. Create a management user (mgmt)
@@ -18,3 +20,6 @@ Add execution permission:
 
 Run:
 ``` sudo ./setup.sh ```
+
+Or with one-command run:
+wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh | sudo bash
