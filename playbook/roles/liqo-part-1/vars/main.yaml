@@ -1,0 +1,8 @@
+---
+# -----------------------------
+# remote_node_alias = replace with the alias of the remote node declared on the "inventory" file
+# remote_ip = replace with the ip address of the remote node
+# -----------------------------
+
+remote_node_alias: remote_node 
+remote_ip: 130.192.225.118
