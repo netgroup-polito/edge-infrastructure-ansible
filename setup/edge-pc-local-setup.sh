@@ -83,18 +83,18 @@ fi
 echo "Cloning GIT repository.."
 mkdir /home/mgmt/edge-infrastructure-ansible
 
-#git clone https://github.com/netgroup-polito/edge-infrastructure-ansible /home/mgmt/edge-infrastructure-ansible
+git clone https://github.com/netgroup-polito/edge-infrastructure-ansible /home/mgmt/edge-infrastructure-ansible
 
 #####################################
 #   DEBUG: For debugging purpose    #
 #   You can set your repository     #
 #     and your branch to test       #
 #####################################
-git clone https://github.com/giovannimirarchi420/edge-infrastructure-ansible.git /home/mgmt/edge-infrastructure-ansible
-cd /home/mgmt/edge-infrastructure-ansible
-git remote update
-git fetch
-git checkout --track origin/feature/setup-script
+#git clone https://github.com/giovannimirarchi420/edge-infrastructure-ansible.git /home/mgmt/edge-infrastructure-ansible
+#cd /home/mgmt/edge-infrastructure-ansible
+#git remote update
+#git fetch
+#git checkout --track origin/feature/setup-script
 
 #Check repo installation outcome
 if [ $? -eq 0 ]; then

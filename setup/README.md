@@ -16,10 +16,10 @@ The script will perform the following tasks:
 This script need sudo privileges to be run.
 
 Add execution permission:
-``` chmod +x setup.sh ```
+``` chmod +x edge-pc-local-setup.sh ```
 
 Run:
-``` sudo ./setup.sh ```
+``` sudo ./edge-pc-local-setup.sh ```
 
 Or with one-command run:
 wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh | sudo bash
