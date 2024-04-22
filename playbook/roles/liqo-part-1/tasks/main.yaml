@@ -1,0 +1,36 @@
+---
+# -----------------------------
+# This Ansible playbook consists of three main tasks:
+# 
+#   The first task, "Fetch kubeconfig from remote node", 
+#   uses the ansible.builtin.fetch module to retrieve the Kubernetes configuration file (kubeconfig) 
+#   from the remote node and save it locally (on the Ansible control node) in the "/tmp/k3s.yaml" file. 
+#   The delegate_to parameter specifies the remote node from which to fetch the file.
+#
+#   The second task, "Replace localhost with remote IP in kubeconfig", 
+#   uses the replace module to replace the localhost IP address (127.0.0.1) with the remote IP address in the kubeconfig file. 
+#   This is done to ensure that the kubeconfig file points to the correct Kubernetes API server.
+#
+#   The third task, "Replace default with remote in kubeconfig", 
+#   also uses the replace module to replace the context name 'default' with 'remote' in the kubeconfig file. 
+#   This is done to distinguish this context from others that may be in the kubeconfig file.
+# -----------------------------
+
+    - name: Fetch kubeconfig from remote node
+      ansible.builtin.fetch:
+        src: "/etc/rancher/k3s/k3s.yaml"
+        dest: "/tmp/k3s.yaml"
+        flat: yes
+      delegate_to: '{{remote_node_alias}}'
+
+    - name: Replace localhost with remote IP in kubeconfig
+      replace:
+        path: "/tmp/k3s.yaml"
+        regexp: 'https://127.0.0.1:6443'
+        replace: 'https://{{remote_ip}}:6443' 
+
+    - name: Replace default with remote in kubeconfig
+      replace:
+        path: "/tmp/k3s.yaml"
+        regexp: 'default'
+        replace: 'remote'
