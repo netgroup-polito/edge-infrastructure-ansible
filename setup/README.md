@@ -22,4 +22,4 @@ Run:
 ``` sudo ./edge-pc-local-setup.sh ```
 
 Or with one-command run:
-wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh | sudo bash
+``` wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh | sudo bash ```

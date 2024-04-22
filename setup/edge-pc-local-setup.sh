@@ -111,6 +111,7 @@ fi
 #This line is used to avoid to insert the mgmt sudo password to run the ansible script
 echo "mgmt ALL=(ALL) NOPASSWD:ALL" | EDITOR='tee -a' visudo
 
-runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible/playbook/k3s_installation.yaml -i /home/mgmt/edge-infrastructure-ansible/inventory.local'
+runuser -l mgmt -c 'ansible-galaxy collection install -r /home/mgmt/edge-infrastructure-ansible/requirements.yml'
+runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible/playbook/env_setup.yaml -i /home/mgmt/edge-infrastructure-ansible/inventory.local'
 
 exit 0
