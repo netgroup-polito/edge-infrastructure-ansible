@@ -13,7 +13,7 @@ remote_node ansible_user=netgroup ansible_ssh_host=130.192.225.118 ansible_ssh_p
 
 [masters]
 #host1 ansible_user=giorgia ansible_ssh_user=giorgia ansible_ssh_host=192.168.1.23 ansible_ssh_private_key_file=~/.ssh/id_rsa
-host1 ansible_user=giorgia ansible_host=192.168.1.23 
+host1 ansible_user=giorgia ansible_host=192.168.1.23
 
 [workers]
 
