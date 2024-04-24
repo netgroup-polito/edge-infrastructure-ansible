@@ -43,20 +43,14 @@ echo ""
 ################################
 #   STEP 2: Install Ansible    #
 ################################
-echo -n "Installing Ansible..."
+echo "Installing Ansible..."
 # Install Ansible
 
 apt update 2>/dev/null
 apt upgrade -y 2>/dev/null
 apt install -y ansible 2>/dev/null
 apt install sshpass 2>/dev/null
-
-if [ $? -eq 0 ]; then
-  echo " OK"
-else
-  echo "KO, exiting"
-  exit 1
-fi
+apt install unzip 2>/dev/null
 
 #######################################
 #   STEP 2.1: Check Ansible version   #
@@ -70,20 +64,22 @@ ansible --version | grep -q 2.10
 #with ansible 2.10 the k3s-installation playbook fail
 if [ $? -eq 0 ]; then
   echo "Upgrading ansible version..."
-  sudo apt remove -y ansible
-  sudo apt --purge autoremove -y
-  sudo apt -y install software-properties-common
-  sudo apt-add-repository -y ppa:ansible/ansible
-  sudo apt install -y ansible
+  apt remove -y ansible
+  apt --purge autoremove -y
+  apt -y install software-properties-common
+  apt-add-repository -y ppa:ansible/ansible
+  apt install -y ansible
 fi
 
 #########################################
-#   STEP 3: Clone ansible repository    #
+#   STEP 3: Download ansible script     #
 #########################################
-echo "Cloning GIT repository.."
-mkdir /home/mgmt/edge-infrastructure-ansible
+echo -n "Downloading Ansible script.."
+cd /home/mgmt/
 
-git clone https://github.com/netgroup-polito/edge-infrastructure-ansible /home/mgmt/edge-infrastructure-ansible
+curl -LO https://github.com/netgroup-polito/edge-infrastructure-ansible/archive/refs/heads/main.zip
+unzip main.zip
+rm main.zip
 
 #####################################
 #   DEBUG: For debugging purpose    #
@@ -107,11 +103,34 @@ fi
 ######################################
 #   STEP 4: Start ansible script     #
 ######################################
-
+echo "Running Ansible script.."
 #This line is used to avoid to insert the mgmt sudo password to run the ansible script
 echo "mgmt ALL=(ALL) NOPASSWD:ALL" | EDITOR='tee -a' visudo
 
-runuser -l mgmt -c 'ansible-galaxy collection install -r /home/mgmt/edge-infrastructure-ansible/requirements.yml'
-runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible/playbook/env_setup.yaml -i /home/mgmt/edge-infrastructure-ansible/inventory.local'
+runuser -l mgmt -c 'ansible-galaxy collection install -r /home/mgmt/edge-infrastructure-ansible-main/requirements.yml'
+runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory.local'
 
+######################################
+#          STEP 5: Clean             #
+######################################
+while true; do
+  echo "Do you want to delete the ansible script located in /home/mgmt/edge-infrastructure-ansible-main? (y/n)"
+  read answer
+  case $answer in
+    [Yy])
+      rm -rf /home/mgmt/edge-infrastructure-ansible-main
+      echo "/home/mgmt/edge-infrastructure-ansible-main deleted."
+      break
+      ;;
+    [Nn])
+      echo "/home/mgmt/edge-infrastructure-ansible-main will be kept"
+      break
+      ;;
+    *)
+      echo "Please provide a valid answer (y/n)"
+      ;;
+  esac
+done
+
+echo "Installation completed."
 exit 0
