@@ -1,0 +1,11 @@
+[masters]
+127.0.0.1 ansible_connection=local
+
+[workers]
+
+
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=mgmt
+ansible_ssh_pass=root
