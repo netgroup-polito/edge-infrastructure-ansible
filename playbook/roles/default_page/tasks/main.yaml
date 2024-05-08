@@ -1,0 +1,5 @@
+---
+
+- name: DefaultPage Configuration
+  ansible.builtin.import_tasks:
+    file: defaultpage.yaml

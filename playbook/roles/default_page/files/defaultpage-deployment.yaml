@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: defaultpage-service
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 80
+  selector:
+    app: defaultpage
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: defaultpage
+spec:
+  selector:
+    matchLabels:
+      app: defaultpage
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: defaultpage
+    spec:
+      containers:
+        - name: defaultpage
+          image: httpd:alpine3.17
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: defaultpage-index 
+              mountPath: /usr/local/apache2/htdocs/index.html 
+              subPath: index.html 
+      volumes: 
+        - name: defaultpage-index
+          configMap:
+            name: defaultpage-config
+            items:
+              - key: index.html
+                path: index.html

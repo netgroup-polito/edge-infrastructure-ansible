@@ -32,4 +32,3 @@ metadata:
     kubernetes.io/service-account.name: "admin-user"
 type: kubernetes.io/service-account-token
 
-

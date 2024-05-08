@@ -1,0 +1,40 @@
+---
+
+- name: Create defaultPage directory
+  ansible.builtin.file:
+    path: "./defaultpage"
+    state: directory
+
+- name: Copy Index file for webPage in the defaultPage directory
+  ansible.builtin.copy:
+    src: index.html
+    dest: "./defaultpage/index.html"
+
+- name: Creation of ConfigMap for defaultPage
+  ansible.builtin.command: kubectl create configmap defaultpage-config --from-file ./defaultpage/index.html
+
+- name: Copy Deployment File in home directory
+  ansible.builtin.copy:
+    src: defaultpage-deployment.yaml
+    dest: "./defaultpage-deployment.yaml"
+
+- name: Copy defaultPage Ingress File in home directory
+  ansible.builtin.copy:
+    src: defaultpage-ingress.yaml
+    dest: "./defaultpage-ingress.yaml"
+
+- name: Apply Deployment File
+  ansible.builtin.command: kubectl apply -f defaultpage-deployment.yaml
+
+- name: Apply DefaultPage Ingress
+  ansible.builtin.command: kubectl apply -f defaultpage-ingress.yaml
+
+- name: Clean Deployment File
+  file:
+    path: defaultpage-deployment.yaml
+    state: absent
+
+- name: Clean defaultPage Ingress File
+  file:
+    path: defaultpage-ingress.yaml
+    state: absent

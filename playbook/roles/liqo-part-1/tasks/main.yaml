@@ -15,6 +15,11 @@
 #   also uses the replace module to replace the context name 'default' with 'remote' in the kubeconfig file. 
 #   This is done to distinguish this context from others that may be in the kubeconfig file.
 # -----------------------------
+# run command chmod 777 /etc/rancher/k3s/k3s.yaml on remote node
+
+    - name: chmod 777 /etc/rancher/k3s/k3s.yaml
+      ansible.builtin.command: sudo chmod 777 /etc/rancher/k3s/k3s.yaml
+      delegate_to: '{{remote_node_alias}}'
 
     - name: Fetch kubeconfig from remote node
       ansible.builtin.fetch:

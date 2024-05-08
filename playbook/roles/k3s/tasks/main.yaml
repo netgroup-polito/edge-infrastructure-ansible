@@ -1,4 +1,4 @@
 ---
 
-- name: Install k3s       
-  shell: 'curl -sfL https://get.k3s.io | sh -' 
+- name: Install k3s without traefik
+  shell: 'sudo curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik" sh -s - --write-kubeconfig-mode 644-' 

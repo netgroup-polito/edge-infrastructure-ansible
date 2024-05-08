@@ -9,10 +9,16 @@
 # -----------------------------
 
 - name: Cluster prep
-  hosts: masters
+  hosts: myhosts
   gather_facts: true
   become: true
   pre_tasks:
+
+    - name: Get OS language
+      when: not ansible_env.LANG.startswith('en')
+      ansible.builtin.debug:
+        msg: "OS language must be set to English"
+
     - name : Get k3s version
       ansible.builtin.command: k3s --version
       register: k3s_version_output
@@ -21,15 +27,17 @@
 
   roles:
     - role: prereq
-      when: k3s_version_output.rc != 0
+      when: k3s_version_output.rc != 0 and ansible_env.LANG.startswith('en')
     - role: k3s
-      when: k3s_version_output.rc != 0
-    - role: energymon
+      when: k3s_version_output.rc != 0 and ansible_env.LANG.startswith('en')
+    - role: nginx_installation
+      when: ansible_env.LANG.startswith('en')
+#    - role: energymon
     - role: liqo-setup
   
-- name: DDNS updater setup
-  hosts: local_node
-  become: true
+#- name: DDNS updater setup
+#  hosts: remote_node
+#  become: true
 
-  roles:
-    - role: ddns
+#  roles:
+#    - role: ddns
