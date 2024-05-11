@@ -1,16 +1,24 @@
 # Creating Kubernetes cluster using K3s with Ansible
 
 ## Requirements
-The control node needs **Ansible** to start the playbooks. 
+The control node needs **Ansible** to start the playbooks.
+
+The OS of the managed node must have English language to use the playbooks. 
 
 It is reccomended to disable swap and firewall on the managed node. If the firewall is enabled, the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
+
+**Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
+
 ## Usage 
 To start the playbooks, you need to modify the **inventory** file in order to be consistent with your cluster setup. 
+It is also possible to add new ```vars``` in order to enhance your environment. 
 
 Start the creation of Kubernetes cluster using the following command:
 ```bash
-ansible-playbook --ask-become-pass playbook/env_setup.yaml -i inventory
+ansible-playbook --ask-become-pass playbook/k3s_installation.yaml -i inventory
 ```
+
+In this setup, k3s is installed using ```--disable=traefik``` flag in order to remove Traefik from the cluster, because **nginx** Ingress Controller is used. For more details see the [official documentation](https://docs.k3s.io/networking/networking-services).
 
 ## Kubernetes Dashboard
 An optional playbook is provided to deploy and access Kubernetes Dashboard within the K3s cluster. To use it run the following command:
@@ -24,11 +32,8 @@ To retrieve the token run the following command:
 sudo kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 ```
 
-The Dashboard can be reached through a **NodePort service**. The ```dashboard``` role handles the configuration of a NodePort service.
-To retrieve the NodePort run the following command:
-```bash
-sudo kubectl --namespace kubernetes-dashboard get svc kubernetes-dashboard -o=jsonpath="{.spec.ports[0].nodePort}"
-```
+The dashboard is reachable via both HTTP and HTTPS at the address __*http(s)://{node IP address}/dashboard*__ thanks to the **LoadBalancer service**.
+For instance, if the IP address of your edge node is 192.168.1.2, the dashboard will be reached at https://192.168.1.2/dashboard.
 
 # Energy monitoring
 The ```energymon``` role is responsible for installing and configuring the monitoring part.
@@ -129,3 +134,7 @@ ansible-playbook playbook/liqo_peering_in.yaml -i inventory
 ```bash
 ansible-playbook playbook/liqo_peering_out.yaml -i inventory
 ```
+
+## Default page
+
+A **web page** hosting links to all dashboards available in this cluster is reachable via: __*http(s)://{node IP address}*__

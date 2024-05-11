@@ -1,0 +1,30 @@
+---
+
+- name: Deploy Kubernetes Dashboard 
+  ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+- name: Copy Dashboard Configuration File in home directory
+  ansible.builtin.copy:
+    src: dashboard_adminuser.yaml
+    dest: "./dashboard_user.yaml"
+
+- name: Apply Dashboard Configuration File
+  ansible.builtin.command: kubectl apply -f dashboard_user.yaml
+
+- name: Copy Ingress Configuration File in home directory
+  ansible.builtin.copy:
+    src: ingress.yaml
+    dest: "./ingress.yaml"
+
+- name: Apply Ingress Configuration File
+  ansible.builtin.command: kubectl apply -f ingress.yaml 
+
+- name: Clean Dashboard Configuration File
+  file:
+    path: dashboard_user.yaml
+    state: absent
+
+- name: Clean Ingress Configuration File
+  file:
+    path: ingress.yaml
+    state: absent

@@ -26,6 +26,7 @@
 
     - name: Merge kubeconfig files
       shell: |
+            sudo chmod 777 /etc/rancher/k3s/k3s.yaml
             KUBECONFIG=/tmp/k3s.yaml:/etc/rancher/k3s/k3s.yaml kubectl config view --flatten > /tmp/merged_kubeconfig.yaml
             sudo mv /tmp/merged_kubeconfig.yaml /etc/rancher/k3s/merged_kubeconfig.yaml
 
