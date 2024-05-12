@@ -1,0 +1,5 @@
+---
+
+- name: Nginx Ingress Controller configuration
+  ansible.builtin.import_tasks:
+    file: nginx_ingressController.yaml

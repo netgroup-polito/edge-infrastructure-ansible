@@ -1,0 +1,20 @@
+---
+
+- name: Installation of nginx Ingress Controller
+  ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.1/deploy/static/provider/baremetal/deploy.yaml
+
+- name: Configure the nginx Ingress Controller as the default one
+  ansible.builtin.command: kubectl annotate ingressclass nginx ingressclass.kubernetes.io/is-default-class=true
+  
+- name: Copy LoadBalancer Configuration File in home directory
+  ansible.builtin.template:
+    src: loadbalancer.j2
+    dest: "./loadbalancer.yaml"
+
+- name: Apply LoadBalancer Configuration File
+  ansible.builtin.command: kubectl apply -f loadbalancer.yaml
+
+- name: Clean LoadBalancer Configuration File
+  file:
+    path: loadbalancer.yaml
+    state: absent

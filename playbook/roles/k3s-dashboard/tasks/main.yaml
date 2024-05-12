@@ -1,0 +1,5 @@
+---
+
+- name: k3s dashboard configuration
+  ansible.builtin.import_tasks:
+    file: k3s_dashboard.yaml
