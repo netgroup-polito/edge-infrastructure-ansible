@@ -45,9 +45,9 @@
       when: helm_version_output.rc != 0 and ansible_env.LANG.startswith('en')
 
 
-#- name: DDNS updater setup
-#  hosts: remote_node
-#  become: true
+- name: DDNS updater setup
+  hosts: remote_node
+  become: true
 
-#  roles:
-#    - role: ddns
+  roles:
+    - role: ddns
