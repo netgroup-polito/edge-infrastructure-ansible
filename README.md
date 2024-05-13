@@ -108,7 +108,7 @@ To get started with the Cloud Continuum project, follow these initial setup step
 
 
 ```bash
-ansible-playbook playbook/env-setup.yaml -i inventory
+ansible-playbook playbook/env_setup.yaml -i inventory
 ```
 
 ### Liqo Dashboard Installation
@@ -126,13 +126,13 @@ These Ansible playbooks perform the in-band peering between the two clusters (my
 1. Liqo peering from the local node to the central cluster
 
 ```bash
-ansible-playbook playbook/liqo_peering_in.yaml -i inventory
+ansible-playbook playbook/liqo_outgoing_peering.yaml -i inventory
 ```
 
 2. Liqo peering from the central cluster to the local node
 
 ```bash
-ansible-playbook playbook/liqo_peering_out.yaml -i inventory
+ansible-playbook playbook/liqo_incoming_peering_out.yaml -i inventory
 ```
 
 ## Default page
