@@ -9,21 +9,29 @@ It is reccomended to disable swap and firewall on the managed node. If the firew
 
 **Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
 
-## Usage 
+### Environment Setup
 To start the playbooks, you need to modify the **inventory** file in order to be consistent with your cluster setup. 
 It is also possible to add new ```vars``` in order to enhance your environment. 
 
-Start the creation of Kubernetes cluster using the following command:
+
+ This Ansible playbook setup the environment:
+
+ • Installation of K3S and Liqo on the local node and remote node (myhosts)
+
+ • Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file roles/ddns/vars/main.yaml.
+
+
 ```bash
-ansible-playbook --ask-become-pass playbook/k3s_installation.yaml -i inventory
+ansible-playbook playbook/env_setup.yaml -i inventory
 ```
 
 In this setup, k3s is installed using ```--disable=traefik``` flag in order to remove Traefik from the cluster, because **nginx** Ingress Controller is used. For more details see the [official documentation](https://docs.k3s.io/networking/networking-services).
 
-## Kubernetes Dashboard
+## Dashboard
 An optional playbook is provided to deploy and access Kubernetes Dashboard within the K3s cluster. To use it run the following command:
+
 ```bash
-ansible-playbook --ask-become-pass playbook/dashboard_deploy.yaml -i inventory   ⁠
+ansible-playbook playbook/dashboard_deploy.yaml -i inventory   ⁠
 ```
 
 To access the Dashboard a **token** is needed. The ```dashboard``` role handles the creation of a long-lived Bearer Token.
@@ -34,6 +42,8 @@ sudo kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.t
 
 The dashboard is reachable via both HTTP and HTTPS at the address __*http(s)://{node IP address}/dashboard*__ thanks to the **LoadBalancer service**.
 For instance, if the IP address of your edge node is 192.168.1.2, the dashboard will be reached at https://192.168.1.2/dashboard.
+
+###### This playbook installs also the Liqo Dashboard (to be reviewed)
 
 # Energy monitoring
 The ```energymon``` role is responsible for installing and configuring the monitoring part.
@@ -90,34 +100,10 @@ The project adopts the "cloud continuum" paradigm, similar to that in the FLUIDO
 - **Bash**
 - Programming in **Go**, **JavaScript**, and frameworks like **React** may be needed for further development.
 
-## Getting Started
-
-To get started with the Cloud Continuum project, follow these initial setup steps:
-
 ### Prerequisites
 
 - Basic knowledge of Bash and Ansible scripting is recommended.
 
-### Environment Setup
-
- This Ansible playbook setup the environment:
-
- • Installation of K3S and Liqo on the local node and remote node (myhosts)
-
- • Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file roles/ddns/vars/main.yaml.
-
-
-```bash
-ansible-playbook playbook/env_setup.yaml -i inventory
-```
-
-### Liqo Dashboard Installation
-
-This Ansible playbook installs Liqo Dashboard on the local node.
-
-```bash
-ansible-playbook playbook/liqo-dashboard_deploy.yaml -i inventory
-```
 
 ### Liqo In-Band Peering
 
