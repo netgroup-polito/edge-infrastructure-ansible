@@ -2,10 +2,9 @@
 
 ## Requirements
 The control node needs **Ansible** to start the playbooks.
-
 The OS of the managed node must have English language to use the playbooks. 
-
-It is reccomended to disable swap and firewall on the managed node. If the firewall is enabled, the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
+It is reccomended to disable swap and firewall on the managed node.
+If the firewall is enabled, the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
 
 **Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
 
@@ -13,13 +12,9 @@ It is reccomended to disable swap and firewall on the managed node. If the firew
 To start the playbooks, you need to modify the **inventory** file in order to be consistent with your cluster setup. 
 It is also possible to add new ```vars``` in order to enhance your environment. 
 
-
- This Ansible playbook setup the environment:
-
- • Installation of K3S and Liqo on the local node and remote node (myhosts)
-
- • Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file roles/ddns/vars/main.yaml.
-
+This Ansible playbook sets up the environment:
+- Installation of K3S and Liqo on the local node and remote node (myhosts)
+- Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file roles/ddns/vars/main.yaml.
 
 ```bash
 ansible-playbook playbook/env_setup.yaml -i inventory
