@@ -1,7 +1,7 @@
 ---
 
 - name: Deploy Kubernetes Dashboard
-  hosts: myhosts
+  hosts: local_node
   gather_facts: true
   become: true
   pre_tasks:
@@ -23,3 +23,4 @@
       when: k3s_version_output.rc == 0 and dashboard_check_output.rc != 0
     - role: default_page
       when: k3s_version_output.rc == 0
+    - role: liqo-dashboard

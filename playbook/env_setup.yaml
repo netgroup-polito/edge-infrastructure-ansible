@@ -9,7 +9,7 @@
 # -----------------------------
 
 - name: Cluster prep
-  hosts: myhosts
+  hosts: local_node
   gather_facts: true
   become: true
   pre_tasks:
@@ -25,6 +25,12 @@
       changed_when: false
       ignore_errors: true
 
+    - name : Get helm version
+      ansible.builtin.command: helm version
+      register: helm_version_output
+      changed_when: false
+      ignore_errors: true
+
   roles:
     - role: prereq
       when: k3s_version_output.rc != 0 and ansible_env.LANG.startswith('en')
@@ -32,12 +38,16 @@
       when: k3s_version_output.rc != 0 and ansible_env.LANG.startswith('en')
     - role: nginx_installation
       when: ansible_env.LANG.startswith('en')
+    - role: helm_installation
+      when: helm_version_output.rc != 0 and ansible_env.LANG.startswith('en')
 #    - role: energymon
     - role: liqo-setup
-  
-#- name: DDNS updater setup
-#  hosts: remote_node
-#  become: true
+      when: helm_version_output.rc != 0 and ansible_env.LANG.startswith('en')
 
-#  roles:
-#    - role: ddns
+
+- name: DDNS updater setup
+  hosts: remote_node
+  become: true
+
+  roles:
+    - role: ddns

@@ -1,83 +1,30 @@
 ---
 # -----------------------------
-# This Ansible playbook consists of several tasks:
-#
-#   "Clone LiqoDash repository": 
-#   This task uses the git module to clone the LiqoDash repository from GitHub into the /tmp/dashboard directory on the target machine.
-#
-#   "Install LiqoDash with Helm": 
-#   This task uses the community.kubernetes.helm module to install the LiqoDash Helm chart located in the /tmp/dashboard/kubernetes/dashboard_chart directory. 
-#   The Helm release is named 'liqo-dashboard' and is installed in the 'default' namespace. If the namespace does not exist, it is created. 
-#   The chart is installed with the values version: 'latest' and ingress: '{{ ingress_hostname | default("example.dashboard.com") }}'.
-#
-#   "Get NodePort information": 
-#   This task uses the community.kubernetes.k8s_info module to retrieve information about the 'liqo-dashboard' Service in the 'default' namespace. 
-#   The information is registered in the nodeport_info variable.
-#
-#   "Extract NodePort": 
-#   This task uses the set_fact module to extract the NodePort from the nodeport_info variable and store it in the nodeport variable.
-#
-#   "Get master node IP": 
-#   This task uses the community.kubernetes.k8s_info module to retrieve information about the master node. 
-#   The information is registered in the master_node_info variable.
-#   
-#   "Extract master node IP": 
-#   This task uses the set_fact module to extract the master node's internal IP address from the master_node_info variable and store it in the master_ip variable.
-#   
-#   "Output access information": 
-#   This task uses the debug module to print a message indicating how to access LiqoDash. 
-#   The message includes the master node's IP address and the NodePort.
+# This Ansible playbook installs the Liqo Dashboard on the cluster
 # -----------------------------
-- name: Install helm 
-  shell: | 
-      curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-      sudo apt-get install apt-transport-https --yes
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-      sudo apt-get update
-      sudo apt-get install helm
 
 - name: Clone LiqoDash repository
   git:
     repo: 'https://github.com/liqotech/dashboard'
     dest: '/tmp/dashboard'
     version: 'master'
+
+- name: Install LiqoDash with Helm 
+  shell: | 
+    export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+    helm install liqo-dashboard /tmp/dashboard/kubernetes/dashboard_chart
     
-- name: Install LiqoDash with Helm
-  kubernetes.core.helm:
-    name: 'liqo-dashboard'
-    chart_ref: '/tmp/dashboard/kubernetes/dashboard_chart'
-    release_namespace: 'default'
-    create_namespace: true
-    values:
-      version: 'latest'
-      ingress: '{{ ingress_hostname | default("example.dashboard.com") }}'
-    kubeconfig: '/etc/rancher/k3s/k3s.yaml'
+- name: Copy Ingress Configuration File in home directory
+  ansible.builtin.copy:
+    src: ingress.yaml
+    dest: "./liqo-ingress.yaml"
 
-- name: Get NodePort information
-  kubernetes.core.k8s_info:
-    api_version: v1
-    kind: Service
-    namespace: default
-    name: liqo-dashboard
-    kubeconfig: '/etc/rancher/k3s/k3s.yaml'
-  register: nodeport_info
+- name: Apply Ingress Configuration File
+  ansible.builtin.command: kubectl apply -f liqo-ingress.yaml 
 
-- name: Extract NodePort
-  set_fact:
-    nodeport: "{{ nodeport_info.resources[0].spec.ports[0].nodePort }}"
+  
 
-- name: Get master node IP
-  community.kubernetes.k8s_info:
-    kind: Node
-    label_selectors:
-      - "node-role.kubernetes.io/master"
-    kubeconfig: '/etc/rancher/k3s/k3s.yaml'
-  register: master_node_info
-
-- name: Extract master node IP
-  set_fact:
-    master_ip: "{{ master_node_info.resources[0].status.addresses | selectattr('type', 'equalto', 'InternalIP') | map(attribute='address') | first }}"
-
-- name: Output access information
-  debug:
-    msg: "Access LiqoDash at https://{{ master_ip }}:{{ nodeport }}"
+- name: Clean Ingress Configuration File
+  file:
+    path: liqo-ingress.yaml
+    state: absent
