@@ -10,6 +10,8 @@ It is reccomended to disable swap and firewall on the managed node. If the firew
 **Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
 
 ### Environment Setup
+
+### Modify the inventory file based on your environment setup
 To start the playbooks, you need to modify the **inventory** file in order to be consistent with your cluster setup. 
 It is also possible to add new ```vars``` in order to enhance your environment. 
 

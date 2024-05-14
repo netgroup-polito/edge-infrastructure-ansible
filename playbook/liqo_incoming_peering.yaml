@@ -10,11 +10,11 @@
   gather_facts: no
 
   roles:
-    - role: liqo-part-1
+    - role: liqo-get-kubeconfig-remote
 
 - name: Transfer modified kubeconfig to remote node
   hosts: local_node
 
   roles:
-    - role: liqo-part-2
+    - role: liqo-push-kubeconfig-local
     - role: liqo-incoming
