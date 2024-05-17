@@ -6,14 +6,14 @@
 # -----------------------------
 
 - name: Transfer kubeconfig from remote to local and prepare it
-  hosts: localhost
+  hosts: 127.0.0.1
   gather_facts: no
 
   roles:
     - role: liqo-get-kubeconfig-remote
 
 - name: Transfer modified kubeconfig to remote node
-  hosts: local_node
+  hosts: 127.0.0.1
 
   roles:
     - role: liqo-push-kubeconfig-local

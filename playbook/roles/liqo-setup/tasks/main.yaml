@@ -1,8 +1,21 @@
+- name: Check if liqoctl is already installed
+  shell: liqoctl -v
+  register: liqoctl_already_installed
+  ignore_errors: true
+
 - name: Download and extract liqoctl
   shell: 'curl --fail -LS "https://github.com/liqotech/liqo/releases/download/v0.10.2/liqoctl-linux-amd64.tar.gz" | tar -xz'
+  when: liqoctl_already_installed != 0
 
 - name: Install liqoctl
   shell: 'sudo install -o root -g root -m 0755 liqoctl /usr/local/bin/liqoctl'
+  when: liqoctl_already_installed != 0
+
+- name: Check if liqo is already installed
+  shell: liqoctl version
+  register: liqo_already_installed
+  ignore_errors: true
 
 - name: Install Liqo       
-  shell: 'sudo liqoctl install k3s --kubeconfig=/etc/rancher/k3s/k3s.yaml' 
+  shell: 'sudo liqoctl install k3s --kubeconfig=/etc/rancher/k3s/k3s.yaml'
+  when: liqo_already_installed != 0

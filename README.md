@@ -8,6 +8,45 @@ If the firewall is enabled, the  ```prereq``` role is responsible to set the rig
 
 **Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
 
+## Running with one-shot command
+
+If three arguments are provided, the script will assume that the user wants to set up peering with a remote cluster.
+In this case, it will install Liqo locally and then configure peering with the remote cluster using the provided IP address, username, and password.
+
+```bash 
+wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password> | sudo bash 
+```
+
+If no arguments are provided, the script will assume that the user wants to install Liqo locally, without peering.
+The second option could be useful for master node initialization.
+```bash 
+wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh | sudo bash 
+```
+
+## Running without one-shot command
+
+There are few files to fill with the real values:
+```bash 
+inventory 
+```
+```bash 
+playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml 
+```
+
+Then launch all playbooks one by one:
+```bash 
+ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+```
+```bash 
+ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/dashboard_deploy.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+```
+```bash 
+ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_incoming_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+```
+```bash 
+ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_outgoing_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+```
+
 ### Environment Setup
 
 ### Modify the inventory file based on your environment setup
@@ -15,7 +54,7 @@ To start the playbooks, you need to modify the **inventory** file in order to be
 It is also possible to add new ```vars``` in order to enhance your environment. 
 
 This Ansible playbook sets up the environment:
-- Installation of K3S and Liqo on the local node and remote node (myhosts)
+- Installation of K3S and Liqo on the local node and remote node (targets)
 - Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file roles/ddns/vars/main.yaml.
 
 ```bash
@@ -63,7 +102,7 @@ The Grafana configuration is located in ```playbook/roles/energymon/files/values
 If the configuration is not modified, it is possible to access grafana with the following credentials:
 
 - user: ```admin```
-- password: ```prom-operator```
+- password: ```root```
 
 ### Tips for Re-Installation
 
@@ -101,10 +140,9 @@ The project adopts the "cloud continuum" paradigm, similar to that in the FLUIDO
 
 - Basic knowledge of Bash and Ansible scripting is recommended.
 
-
 ### Liqo In-Band Peering
 
-These Ansible playbooks perform the in-band peering between the two clusters (myhosts).
+These Ansible playbooks perform the in-band peering between the two clusters (targets).
 
 1. Liqo peering from the local node to the central cluster
 

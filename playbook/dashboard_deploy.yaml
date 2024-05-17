@@ -1,7 +1,7 @@
 ---
 
 - name: Deploy Kubernetes Dashboard
-  hosts: local_node
+  hosts: 127.0.0.1
   gather_facts: true
   become: true
   pre_tasks:
