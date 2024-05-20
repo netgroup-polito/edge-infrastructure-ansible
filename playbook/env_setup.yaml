@@ -2,14 +2,14 @@
 # -----------------------------
 # This Ansible playbook setup the environment:
 #
-# Installation of K3S and Liqo on the local node and remote node (myhosts)
+# Installation of K3S and Liqo on the local node and remote node (targets)
 #
 # Installation and setup of the ddns updater on a specific node (ddns)
 #
 # -----------------------------
 
 - name: Cluster prep
-  hosts: local_node
+  hosts: localhost
   gather_facts: true
   become: true
   pre_tasks:
@@ -33,16 +33,14 @@
 
   roles:
     - role: prereq
-      when: k3s_version_output.rc != 0 and ansible_env.LANG.startswith('en')
-    - role: k3s
-      when: k3s_version_output.rc != 0 and ansible_env.LANG.startswith('en')
-    - role: nginx_installation
-      when: ansible_env.LANG.startswith('en')
+      when: k3s_version_output.rc != 0 and (ansible_env.LANG.startswith('en') or ansible_env.LANG.startswith('C.UTF-8'))
     - role: helm_installation
-      when: helm_version_output.rc != 0 and ansible_env.LANG.startswith('en')
-#    - role: energymon
+      when: helm_version_output.rc != 0
+    - role: k3s
+      when: k3s_version_output.rc != 0
+    - role: nginx_installation
     - role: liqo-setup
-      when: helm_version_output.rc != 0 and ansible_env.LANG.startswith('en')
+    - role: energymon
 
 
 - name: DDNS updater setup

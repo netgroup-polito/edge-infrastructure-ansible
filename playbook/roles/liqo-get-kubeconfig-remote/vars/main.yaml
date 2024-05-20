@@ -4,5 +4,5 @@
 # remote_ip = replace with the ip address of the remote node
 # -----------------------------
 
-remote_node_alias: remote_node 
-remote_ip: 130.192.225.118
+remote_node_alias: remote_node
+remote_ip: <remote_target_ip>

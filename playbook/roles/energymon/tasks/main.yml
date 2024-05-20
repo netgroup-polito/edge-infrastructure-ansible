@@ -1,11 +1,5 @@
 ---
 
-- name: Curl
-  ansible.builtin.import_tasks:
-    file: curl.yaml
-- name: Helm 
-  ansible.builtin.import_tasks:
-    file: helm.yaml
 - name: Prometheus and Grafana
   ansible.builtin.import_tasks:
     file: prometheus-grafana.yaml

@@ -13,7 +13,7 @@
     - role: liqo-get-kubeconfig-remote
 
 - name: Transfer modified kubeconfig to remote node
-  hosts: local_node
+  hosts: localhost
 
   roles:
     - role: liqo-push-kubeconfig-local
