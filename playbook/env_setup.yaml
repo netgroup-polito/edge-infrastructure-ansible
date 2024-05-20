@@ -9,7 +9,7 @@
 # -----------------------------
 
 - name: Cluster prep
-  hosts: 127.0.0.1
+  hosts: localhost
   gather_facts: true
   become: true
   pre_tasks:

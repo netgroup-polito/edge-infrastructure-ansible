@@ -194,6 +194,7 @@ while true; do
         fi
       done
       if [ $CHECK_OK -eq 1 ]; then
+        echo "mgmt:$pw1" | chpasswd
         echo "Password changed successfully."
         break
       fi
