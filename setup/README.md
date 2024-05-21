@@ -30,7 +30,16 @@ The second option could be useful for master node initialization.
 Or with one-command run:
 
 With Liqo peering:
-``` wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password> | sudo bash ```
+```bash
+ curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
+ chmod +x edge-pc-local-setup.sh
+ ./edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password>
+``` 
+
 
 Without Liqo peering:
-``` wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh | sudo bash ```
+```bash
+ curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
+ chmod +x edge-pc-local-setup.sh
+ ./edge-pc-local-setup.sh
+``` 

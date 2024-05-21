@@ -2,15 +2,6 @@
 - name: remove swap
   shell: "swapoff -a"
 
-- name: Check curl installation
-  shell: curl --version
-  register: curl_version_result
-  ignore_errors: true
-
-- name: Install curl if not present
-  shell: apt install curl -y
-  when: curl_version_result.rc != 0
-
 - name: Populate service facts
   ansible.builtin.service_facts:
 

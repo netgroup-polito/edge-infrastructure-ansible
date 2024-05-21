@@ -8,30 +8,31 @@ If the firewall is enabled, the  ```prereq``` role is responsible to set the rig
 
 **Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
 
-## Running with one-shot command
+## Running with setup script
+
+Before proceeding with the installation, please run an ```apt update``` and ``` apt upgrade ```.
 
 If three arguments are provided, the script will assume that the user wants to set up peering with a remote cluster.
-In this case, it will install Liqo locally and then configure peering with the remote cluster using the provided IP address, username, and password.
+In this case, it will install Liqo locally and then  configure peering with the remote cluster using the provided IP address, username, and password.
 
-```bash 
-wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password> | sudo bash 
-```
+```bash
+ curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
+ chmod +x edge-pc-local-setup.sh
+ sudo ./edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password>
+``` 
 
 If no arguments are provided, the script will assume that the user wants to install Liqo locally, without peering.
 The second option could be useful for master node initialization.
-```bash 
-wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh | sudo bash 
-```
 
-## Running without one-shot command
+```bash
+ curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
+ chmod +x edge-pc-local-setup.sh
+ sudo ./edge-pc-local-setup.sh
+``` 
 
-There are few files to fill with the real values:
-```bash 
-inventory 
-```
-```bash 
-playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml 
-```
+## Running without setup script
+
+There are few files to fill with the real values: ``` inventory ```, ```playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml ``` and ```playbook/roles/ddns/vars/main.yaml ``` 
 
 Then launch all playbooks one by one:
 ```bash 
