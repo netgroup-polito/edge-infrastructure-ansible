@@ -8,7 +8,7 @@ If the firewall is enabled, the  ```prereq``` role is responsible to set the rig
 
 **Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
 
-## Running with setup script
+## Automatic installation (using setup script)
 
 Before proceeding with the installation, please run an ```apt update``` and ``` apt upgrade ```.
 
@@ -30,22 +30,22 @@ The second option could be useful for master node initialization.
  sudo ./edge-pc-local-setup.sh
 ``` 
 
-## Running without setup script
+## Manual installation (using individual ansible files, for expert users)
 
 There are few files to fill with the real values: ``` inventory ```, ```playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml ``` and ```playbook/roles/ddns/vars/main.yaml ``` 
 
 Then launch all playbooks one by one:
 ```bash 
-ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+ansible-playbook playbook/env_setup.yaml -i inventory 
 ```
 ```bash 
-ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/dashboard_deploy.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+ansible-playbook playbook/dashboard_deploy.yaml -i inventory 
 ```
 ```bash 
-ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_incoming_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+ansible-playbook playbook/liqo_incoming_peering.yaml -i inventory 
 ```
 ```bash 
-ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_outgoing_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+ansible-playbook playbook/liqo_outgoing_peering.yaml -i inventory 
 ```
 
 ### Environment Setup
