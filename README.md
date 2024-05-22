@@ -12,8 +12,7 @@ If the firewall is enabled, the  ```prereq``` role is responsible to set the rig
 
 Before proceeding with the installation, please run an ```apt update``` and ``` apt upgrade ```.
 
-If three arguments are provided, the script will assume that the user wants to set up peering with a remote cluster.
-In this case, it will install Liqo locally and then  configure peering with the remote cluster using the provided IP address, username, and password.
+If three arguments are provided, the script will assume that the user would like to install all the required software _and_ to set up a Liqo peering with a remote cluster, using the provided IP address, username, and password.
 
 ```bash
  curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
@@ -21,7 +20,7 @@ In this case, it will install Liqo locally and then  configure peering with the 
  sudo ./edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password>
 ``` 
 
-If no arguments are provided, the script will assume that the user wants to install Liqo locally, without peering.
+If no arguments are provided, the script will assume that the user wants to install all the required software (including Liqo on the local machine), without setting up the peering with a remote cluster.
 The second option could be useful for master node initialization.
 
 ```bash
@@ -31,6 +30,10 @@ The second option could be useful for master node initialization.
 ``` 
 
 ## Manual installation (using individual ansible files, for expert users)
+
+Manual install is based on multiple Ansible files, which need to be launched individually.
+This provides more flexibility in the installation process, e.g., by enabling to customize some parameters (e.g., you can install a software locally or on a remote machine), and by selecting exactly which software has to be installed.
+However, this method is discouraged for normal users, which are invited to use the installation script.
 
 There are few files to fill with the real values: ``` inventory ```, ```playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml ``` and ```playbook/roles/ddns/vars/main.yaml ``` 
 
