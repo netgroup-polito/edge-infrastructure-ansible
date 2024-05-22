@@ -3,7 +3,7 @@
 ## Requirements
 The control node needs **Ansible** to start the playbooks.
 The OS of the managed node must have English language to use the playbooks. 
-It is reccomended to disable swap and firewall on the managed node.
+It is recommended to disable swap and firewall on the managed node.
 If the firewall is enabled, the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
 
 **Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
@@ -41,15 +41,23 @@ Then launch all playbooks one by one:
 ```bash 
 ansible-playbook playbook/env_setup.yaml -i inventory 
 ```
+The ```env_setup.yaml``` playbook checks prerequisites, installs tools, sets up a k3s cluster, deploys operators (Nginx, Liqo and monitoring), and configures DDNS. Check the [Environment Setup](#environment-setup) section for further details.
+
+
 ```bash 
 ansible-playbook playbook/dashboard_deploy.yaml -i inventory 
 ```
+The ```dashboard_deploy.yaml``` playbook installs the k3s and Liqo dashboards. Run this playbook after completing the ```env_setup.yaml``` playbook. Access the dashboards at ```http://<local_machine_ip>/```. Check the [Dashboard](#dashboard) section for further details.
+
+
 ```bash 
 ansible-playbook playbook/liqo_incoming_peering.yaml -i inventory 
 ```
 ```bash 
 ansible-playbook playbook/liqo_outgoing_peering.yaml -i inventory 
 ```
+The ```liqo_incoming_peering.yaml```, ```liqo_outgoing_peering.yaml``` playbook configures Liqo peering with a remote central node. Check the [Liqo In-Band peering - Cloud Continuum](#liqo-in-band-peering---cloud-continuum) section for further information.
+
 
 ### Environment Setup
 
@@ -58,8 +66,8 @@ To start the playbooks, you need to modify the **inventory** file in order to be
 It is also possible to add new ```vars``` in order to enhance your environment. 
 
 This Ansible playbook sets up the environment:
-- Installation of K3S and Liqo on the local node and remote node (targets)
-- Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file roles/ddns/vars/main.yaml.
+- Installation of K3S and Liqo on the local node
+- Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file ```roles/ddns/vars/main.yaml```.
 
 ```bash
 ansible-playbook playbook/env_setup.yaml -i inventory
@@ -71,7 +79,7 @@ In this setup, k3s is installed using ```--disable=traefik``` flag in order to r
 An optional playbook is provided to deploy and access Kubernetes Dashboard within the K3s cluster. To use it run the following command:
 
 ```bash
-ansible-playbook playbook/dashboard_deploy.yaml -i inventory   ⁠
+ansible-playbook playbook/dashboard_deploy.yaml -i inventory
 ```
 
 To access the Dashboard a **token** is needed. The ```dashboard``` role handles the creation of a long-lived Bearer Token.
@@ -90,10 +98,8 @@ The ```energymon``` role is responsible for installing and configuring the monit
 This role starts immediately after the creation of the k3s cluster.
 In order, it will:
 
-1. Check if curl is installed (and install it if necessary)
-1. Install helm (if not present)
-1. Install Prometheus and Grafana (if not present)
-1. Install Kepler (with attached Grafana dashboard) (if not present)
+1. Install Prometheus and Grafana (if not already present) and set up an ingress for each. 
+1. Install Kepler (with attached Grafana dashboard) (if not already present)
 
 In the absence of an ingress for grafana, it is possible to expose and access grafana via nodeport with the following command:
 
