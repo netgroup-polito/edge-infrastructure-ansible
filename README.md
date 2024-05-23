@@ -48,6 +48,9 @@ The second option could be useful for master node initialization, or if the user
  sudo ./edge-pc-local-setup.sh
 ``` 
 
+Once the installation terminates, a **web page** keeping the links to all dashboards present in the edge node is available at: __*http(s)://{edge node IP address}*__.
+
+
 ## Manual installation (using individual ansible files, for expert users)
 
 Manual install is based on multiple Ansible files, which need to be launched individually.
@@ -112,7 +115,7 @@ For instance, if the IP address of your edge node is 192.168.1.2, the dashboard 
 
 ###### This playbook installs also the Liqo Dashboard (to be reviewed)
 
-# Energy monitoring
+## Energy monitoring
 The ```energymon``` role is responsible for installing and configuring the monitoring part.
 This role starts immediately after the creation of the k3s cluster.
 In order, it will:
@@ -185,6 +188,3 @@ ansible-playbook playbook/liqo_outgoing_peering.yaml -i inventory
 ansible-playbook playbook/liqo_incoming_peering_out.yaml -i inventory
 ```
 
-## Default page
-
-A **web page** hosting links to all dashboards available in this cluster is reachable via: __*http(s)://{node IP address}*__
