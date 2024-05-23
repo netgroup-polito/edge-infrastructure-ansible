@@ -25,9 +25,9 @@ This project is still in its experimental phase; testing has been done mainly in
 
 The automatic install consists in a setup script that has to be launched on each edge node.
 
-Before proceeding with the installation, please run an ```apt update``` and ``` apt upgrade ```.
+Before proceeding with the installation, please run ```apt update``` and ``` apt upgrade ```.
 
-Then, we have to download the install script from this repository and update its permissions:
+Then, you have to download the install script from this repository and update its permissions:
 
 ```bash
  curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
