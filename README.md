@@ -31,7 +31,7 @@ Before proceeding with the installation, please run ```apt update``` and ``` apt
 Then, you have to download the install script from this repository and update its permissions:
 
 ```bash
- curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
+ curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh > edge-pc-local-setup.sh
  chmod +x edge-pc-local-setup.sh
 ``` 
 
