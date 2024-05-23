@@ -7,14 +7,15 @@ This software repository contains some scripts to setup an edge-to-cloud infrast
 The installed software includes Liqo, which enables the creation of _'stretched Kubernetes clusters'_, which can span across edge devices and cloud. This allows (a) edge users to transparently offload local applications on the cloud cluster, and (b) the cloud manager to offload (i.e., _push_) applications on edge node, achieving a transparent _cloud continuum_.
 
 Installation scripts can operate in two ways:
-- Automatic installation: a `bash` script is executed directly on the edge node, which installs all the required software and (optionally) sets up a Liqo peering with the cloud cluster.
-- Manual insallation: multiple Ansible scripts can be executed individually, allowing to install and customize all the required software on the edge node, with more possibilities to customize running parameters and/or to decide which software has to be installed. Furthermore, these scripts can be launched from an Ansible control server, and executed on one or more edge nodes contemporarily (_push_ mode).
+- **Automatic install**: a `bash` script is executed directly on the edge node, which installs all the required software and (optionally) sets up a Liqo peering with the cloud cluster.
+- **Manual install**: multiple Ansible scripts can be executed individually, allowing to install and customize all the required software on the edge node, with more possibilities to customize running parameters and/or to decide which software has to be installed. Furthermore, these scripts can be launched from an Ansible control server, and executed on one or more edge nodes contemporarily (_push_ mode).
 
-## Requirements
-Edge node must have the OS in English language.
-Currently, most of the testing has been done in Ubuntu 22.04 LTS.
-It is recommended to disable swap and firewall on the managed node.
-If the firewall is enabled, the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
+This project is still in its experimental phase; testing has been done mainly in Ubuntu 22.04 LTS.
+
+## Requirements and suggestions
+- OS language on edge node must be English.
+- It is recommended to disable swap and firewall on the managed node.
+- If the firewall is enabled, the  ```prereq``` role in the fist Ansible playbook is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
 
 **Note 1**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
 **Note 2**: if Ansible playbooks are executed directly instead of the automatic `bash` script, the node that starts the playbook must have **Ansible** installed.
@@ -22,22 +23,28 @@ If the firewall is enabled, the  ```prereq``` role is responsible to set the rig
 
 ## Automatic installation (using setup script)
 
+The automatic install consists in a setup script that has to be launched on each edge node.
+
 Before proceeding with the installation, please run an ```apt update``` and ``` apt upgrade ```.
 
-If three arguments are provided, the script will assume that the user would like to install all the required software _and_ to set up a Liqo peering with a remote cluster, using the provided IP address, username, and password.
+Then, we have to download the install script from this repository and update its permissions:
 
 ```bash
  curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
  chmod +x edge-pc-local-setup.sh
+``` 
+
+The script can be executed either with three arguments, or with nothing.
+In the first case, the script will assume that the user would like to install all the required software _and_ to set up a Liqo peering with a remote cluster, using the provided IP address, username, and password:
+
+```bash
  sudo ./edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password>
 ``` 
 
 If no arguments are provided, the script will assume that the user wants to install all the required software (including Liqo on the local machine), without setting up the peering with a remote cluster.
-The second option could be useful for master node initialization.
+The second option could be useful for master node initialization, or if the user needs to peer to a remote cluster at a later time: 
 
 ```bash
- curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
- chmod +x edge-pc-local-setup.sh
  sudo ./edge-pc-local-setup.sh
 ``` 
 
