@@ -12,12 +12,13 @@ Installation scripts can operate in two ways:
 
 This project is still in its experimental phase; testing has been done mainly in Ubuntu 22.04 LTS.
 
-## Requirements and suggestions
+## Requirements
 - OS language on edge node must be English.
 - It is recommended to disable swap and firewall on the managed node.
 - If the firewall is enabled, the  ```prereq``` role in the fist Ansible playbook is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
 
-**Note 1**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
+**Note 1**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled.
+
 **Note 2**: if Ansible playbooks are executed directly instead of the automatic `bash` script, the node that starts the playbook must have **Ansible** installed.
 
 
