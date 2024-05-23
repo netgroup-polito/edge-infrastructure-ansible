@@ -38,6 +38,16 @@ echo ""
 #   STEP 1: MANAGEMENT USER CREATION            #
 #################################################
 
+echo "Getting OS version..."
+. /etc/os-release
+
+if [ ! "$ID" == "ubuntu" ]; then
+    echo ""
+    echo "$PRETTY_NAME is not supported by this script"
+    echo
+    exit 1
+fi
+
 # Create mgmt user
 echo -n "Management user creation..."
 
@@ -51,37 +61,36 @@ else
   echo "KO, exiting"
   exit 1
 fi
+
+#################################################
+##   STEP 3: Install Ansible + required tools   #
+#################################################
+
+# --------------------------------------------
+# Check to see if Ansible is already installed
+# --------------------------------------------
 echo ""
+echo "Checking to see if Ansible is already installed"
+if hash ansible 2>/dev/null ; then
+  echo ""
+  echo "Ansible is already installed"
+  echo ""
+else
+  # ---------------
+  # Install Ansible + tools
+  # ---------------
 
-################################
-#   STEP 2: Install Ansible    #
-################################
-echo "Installing Ansible..."
-# Install Ansible
+  echo ""
+  echo "Installing sshpass, unzip and curl"
+  apt install -y sshpass
+  apt install -y unzip
+  apt install -y curl
+  echo ""
+  echo "Adding PPA, then installing Ansible"
+  apt-add-repository ppa:ansible/ansible -y
+  apt-get update
+  apt-get install software-properties-common ansible python3-apt -y
 
-apt update 2>/dev/null
-apt upgrade -y 2>/dev/null
-apt install -y ansible 2>/dev/null
-apt install -y sshpass 2>/dev/null
-apt install -y unzip 2>/dev/null
-
-#######################################
-#   STEP 2.1: Check Ansible version   #
-#######################################
-ansible --version | grep -q 2.10
-
-#By default seems that apt install ansible on ubuntu server "ubuntu-22.04.4-live-server-arm64" install ansible 2.10
-#which is not appropriate to run the k3s_installation playbook
-
-#Install latest ansible version
-#with ansible 2.10 the k3s-installation playbook fail
-if [ $? -eq 0 ]; then
-  echo "Upgrading ansible version..."
-  apt remove -y ansible
-  apt --purge autoremove -y
-  apt -y install software-properties-common
-  apt-add-repository -y ppa:ansible/ansible
-  apt install -y ansible
 fi
 
 #########################################
@@ -145,8 +154,7 @@ fi
 #          STEP 6: Clean             #
 ######################################
 while true; do
-  echo "Do you want to delete the ansible script located in /home/mgmt/edge-infrastructure-ansible-main? (y/n)"
-  read answer
+  read -p "Do you want to delete the ansible script located in /home/mgmt/edge-infrastructure-ansible-main? (y/n) " answer
   case $answer in
     [Yy])
       rm -rf /home/mgmt/edge-infrastructure-ansible-main
@@ -174,10 +182,9 @@ function check_passwords() {
 }
 
 while true; do
-  echo "The user mgmt was been created and used to perform the installation.
+  read -p "The user mgmt was been created and used to perform the installation.
   The default password is: root
-  Would you like to change the password? (y/n)"
-  read answer
+  Would you like to change the password? (y/n) " answer
   case $answer in
     [Yy])
       CHECK_OK=0

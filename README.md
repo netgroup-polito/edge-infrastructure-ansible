@@ -3,49 +3,61 @@
 ## Requirements
 The control node needs **Ansible** to start the playbooks.
 The OS of the managed node must have English language to use the playbooks. 
-It is reccomended to disable swap and firewall on the managed node.
+It is recommended to disable swap and firewall on the managed node.
 If the firewall is enabled, the  ```prereq``` role is responsible to set the right environment as explained in [K3s requirements](https://docs.k3s.io/installation/requirements).
 
 **Please note**: the port 22/tcp is used by Ansible, so make sure you have a rule for that if the firewall is enabled. 
 
-## Running with one-shot command
+## Automatic installation (using setup script)
 
-If three arguments are provided, the script will assume that the user wants to set up peering with a remote cluster.
-In this case, it will install Liqo locally and then configure peering with the remote cluster using the provided IP address, username, and password.
+Before proceeding with the installation, please run an ```apt update``` and ``` apt upgrade ```.
 
-```bash 
-wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password> | sudo bash 
-```
+If three arguments are provided, the script will assume that the user would like to install all the required software _and_ to set up a Liqo peering with a remote cluster, using the provided IP address, username, and password.
 
-If no arguments are provided, the script will assume that the user wants to install Liqo locally, without peering.
+```bash
+ curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
+ chmod +x edge-pc-local-setup.sh
+ sudo ./edge-pc-local-setup.sh <remote_target_ip> <remote_target_user> <remote_target_password>
+``` 
+
+If no arguments are provided, the script will assume that the user wants to install all the required software (including Liqo on the local machine), without setting up the peering with a remote cluster.
 The second option could be useful for master node initialization.
-```bash 
-wget -O - https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh | sudo bash 
-```
 
-## Running without one-shot command
+```bash
+ curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-local-setup.sh
+ chmod +x edge-pc-local-setup.sh
+ sudo ./edge-pc-local-setup.sh
+``` 
 
-There are few files to fill with the real values:
-```bash 
-inventory 
-```
-```bash 
-playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml 
-```
+## Manual installation (using individual ansible files, for expert users)
+
+Manual install is based on multiple Ansible files, which need to be launched individually.
+This provides more flexibility in the installation process, e.g., by enabling to customize some parameters (e.g., you can install a software locally or on a remote machine), and by selecting exactly which software has to be installed.
+However, this method is discouraged for normal users, which are invited to use the installation script.
+
+There are few files to fill with the real values: ``` inventory ```, ```playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml ``` and ```playbook/roles/ddns/vars/main.yaml ``` 
 
 Then launch all playbooks one by one:
 ```bash 
-ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+ansible-playbook playbook/env_setup.yaml -i inventory 
+```
+The ```env_setup.yaml``` playbook checks prerequisites, installs tools, sets up a k3s cluster, deploys operators (Nginx, Liqo and monitoring), and configures DDNS. Check the [Environment Setup](#environment-setup) section for further details.
+
+
+```bash 
+ansible-playbook playbook/dashboard_deploy.yaml -i inventory 
+```
+The ```dashboard_deploy.yaml``` playbook installs the k3s and Liqo dashboards. Run this playbook after completing the ```env_setup.yaml``` playbook. Access the dashboards at ```http://<local_machine_ip>/```. Check the [Dashboard](#dashboard) section for further details.
+
+
+```bash 
+ansible-playbook playbook/liqo_incoming_peering.yaml -i inventory 
 ```
 ```bash 
-ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/dashboard_deploy.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
+ansible-playbook playbook/liqo_outgoing_peering.yaml -i inventory 
 ```
-```bash 
-ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_incoming_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
-```
-```bash 
-ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_outgoing_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory 
-```
+The ```liqo_incoming_peering.yaml```, ```liqo_outgoing_peering.yaml``` playbook configures Liqo peering with a remote central node. Check the [Liqo In-Band peering - Cloud Continuum](#liqo-in-band-peering---cloud-continuum) section for further information.
+
 
 ### Environment Setup
 
@@ -54,8 +66,8 @@ To start the playbooks, you need to modify the **inventory** file in order to be
 It is also possible to add new ```vars``` in order to enhance your environment. 
 
 This Ansible playbook sets up the environment:
-- Installation of K3S and Liqo on the local node and remote node (targets)
-- Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file roles/ddns/vars/main.yaml.
+- Installation of K3S and Liqo on the local node
+- Installation and setup of the ddns updater on a specific node (ddns). Configuration concerning the DDNS service is required, check the file ```roles/ddns/vars/main.yaml```.
 
 ```bash
 ansible-playbook playbook/env_setup.yaml -i inventory
@@ -67,7 +79,7 @@ In this setup, k3s is installed using ```--disable=traefik``` flag in order to r
 An optional playbook is provided to deploy and access Kubernetes Dashboard within the K3s cluster. To use it run the following command:
 
 ```bash
-ansible-playbook playbook/dashboard_deploy.yaml -i inventory   ⁠
+ansible-playbook playbook/dashboard_deploy.yaml -i inventory
 ```
 
 To access the Dashboard a **token** is needed. The ```dashboard``` role handles the creation of a long-lived Bearer Token.
@@ -86,10 +98,8 @@ The ```energymon``` role is responsible for installing and configuring the monit
 This role starts immediately after the creation of the k3s cluster.
 In order, it will:
 
-1. Check if curl is installed (and install it if necessary)
-1. Install helm (if not present)
-1. Install Prometheus and Grafana (if not present)
-1. Install Kepler (with attached Grafana dashboard) (if not present)
+1. Install Prometheus and Grafana (if not already present) and set up an ingress for each. 
+1. Install Kepler (with attached Grafana dashboard) (if not already present)
 
 In the absence of an ingress for grafana, it is possible to expose and access grafana via nodeport with the following command:
 
