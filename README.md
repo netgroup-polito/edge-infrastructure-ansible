@@ -1,4 +1,4 @@
-# Setting up and edge-to-cloud infrastructure with Ansible
+# Setting up an edge-to-cloud infrastructure with Ansible
 
 This software repository contains some scripts to setup an edge-to-cloud infrastructure, which is made by:
 - a variable number of **edge nodes**, equipped with a lightweight flavor of Kubernetes (K3s)
