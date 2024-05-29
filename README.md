@@ -86,19 +86,19 @@ There are several files that require you to fill in the real values before runni
 
 Then launch all playbooks one by one:
 
-### env_setup.yaml
+### Setup of the environment
 ```bash 
 ansible-playbook playbook/env_setup.yaml -i inventory 
 ```
 The ```env_setup.yaml``` playbook checks prerequisites, installs tools, sets up a k3s cluster, deploys operators (Nginx, Liqo and monitoring), and configures DDNS. Check the [Environment Setup](#environment-setup) section for further details.
 
-### dashboard_deploy.yaml
+### Dashboard deployment
 ```bash 
 ansible-playbook playbook/dashboard_deploy.yaml -i inventory 
 ```
 The ```dashboard_deploy.yaml``` playbook installs the k3s and Liqo dashboards. Run this playbook after completing the ```env_setup.yaml``` playbook. Access the dashboards at ```http://<local_machine_ip>/```. Check the [Dashboard](#dashboard) section for further details.
 
-### liqo_incoming_peering.yaml & liqo_outgoing_peering.yaml
+### Incoming & Outgoing Liqo Peering
 ```bash 
 ansible-playbook playbook/liqo_incoming_peering.yaml -i inventory 
 ```
