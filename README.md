@@ -69,6 +69,7 @@ There are several files that require you to fill in the real values before runni
 - ```inventory```: This file defines the target machines for your Ansible deployment.
 - ```playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml```: This file stores variables specific to the Liqo remote cluster configuration.
 - ```playbook/roles/ddns/vars/main.yaml```: This file stores variables for configuring Dynamic DNS (DDNS).
+- ```playbook/roles/energymon/files/values.yaml```: This file defines all configuration values for the Grafana and Prometheus Helm releases. Please update the grafana.adminPassword field.
 
 ### What each playbook installs
 
