@@ -51,28 +51,53 @@ The second option could be useful for master node initialization, or if the user
 
 Once the installation terminates, a **web page** keeping the links to all dashboards present in the edge node is available at: __*http(s)://{edge node IP address}*__.
 
-
 ## Manual installation (using individual ansible files, for expert users)
-
 Manual install is based on multiple Ansible files, which need to be launched individually.
 This provides more flexibility in the installation process, e.g., by enabling to customize some parameters (e.g., you can install a software locally or on a remote machine), and by selecting exactly which software has to be installed.
 However, this method is discouraged for normal users, which are invited to use the installation script.
 
-There are few files to fill with the real values: ``` inventory ```, ```playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml ``` and ```playbook/roles/ddns/vars/main.yaml ``` 
+### Prerequisites
+
+Before running the playbooks, ensure you have the required Ansible modules installed. You can install them using the following command:
+```bash
+ansible-galaxy collection install -r requirements.yml
+```
+
+#### Important note:
+There are several files that require you to fill in the real values before running the playbooks:
+
+- ```inventory```: This file defines the target machines for your Ansible deployment.
+- ```playbook/roles/liqo-get-kubeconfig-remote/vars/main.yaml```: This file stores variables specific to the Liqo remote cluster configuration.
+- ```playbook/roles/ddns/vars/main.yaml```: This file stores variables for configuring Dynamic DNS (DDNS).
+
+### What each playbook installs
+
+- ```env_setup.yaml```:
+  -  Checks prerequisites
+  -  Installs tools
+  -  Sets up a k3s cluster
+  -  Deploys operators (Nginx, Liqo, Grafana, Prometheus and Kepler)
+  -  Configures DDNS (Dynamic DNS)
+- ```dashboard_deploy.yaml```:
+  - Installs k3s and Liqo dashboards
+- ```liqo_incoming_peering.yaml``` & ```liqo_outgoing_peering.yaml``` (combined):
+  - Configures Liqo peering with a remote central node
 
 Then launch all playbooks one by one:
+
+### env_setup.yaml
 ```bash 
 ansible-playbook playbook/env_setup.yaml -i inventory 
 ```
 The ```env_setup.yaml``` playbook checks prerequisites, installs tools, sets up a k3s cluster, deploys operators (Nginx, Liqo and monitoring), and configures DDNS. Check the [Environment Setup](#environment-setup) section for further details.
 
-
+### dashboard_deploy.yaml
 ```bash 
 ansible-playbook playbook/dashboard_deploy.yaml -i inventory 
 ```
 The ```dashboard_deploy.yaml``` playbook installs the k3s and Liqo dashboards. Run this playbook after completing the ```env_setup.yaml``` playbook. Access the dashboards at ```http://<local_machine_ip>/```. Check the [Dashboard](#dashboard) section for further details.
 
-
+### liqo_incoming_peering.yaml & liqo_outgoing_peering.yaml
 ```bash 
 ansible-playbook playbook/liqo_incoming_peering.yaml -i inventory 
 ```

@@ -2,7 +2,7 @@
 ##
 grafana:
   namespaceOverride: "monitoring"
-  adminPassword: root
+  adminPassword: <grafana_password>
 
   ## Config to serve from sub_path https://github.com/prometheus-community/helm-charts/issues/201
   ##
