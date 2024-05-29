@@ -43,6 +43,7 @@ function check_passwords() {
           fi
         done
         if [ $CHECK_OK -eq 1 ]; then
+          echo "Password changed successfully"
           return 0
           break
         fi
@@ -318,9 +319,7 @@ PSW_MGMT="root"
 check_passwords "$MGMT_USER_PSW_ASK_STRING" "mgmt"
 echo "mgmt:$PSW_MGMT" | chpasswd
 
-if [ $? -eq 0 ]; then
-  echo "Password changed successfully."
-else
+if [ $? -ne 0 ]; then
   echo "There was an error while changing the password. As a result, the default password 'root' will remain in place."
 fi
 echo ""
