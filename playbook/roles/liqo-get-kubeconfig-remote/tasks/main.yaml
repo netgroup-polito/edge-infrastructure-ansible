@@ -15,29 +15,22 @@
 #   also uses the replace module to replace the context name 'default' with 'remote' in the kubeconfig file. 
 #   This is done to distinguish this context from others that may be in the kubeconfig file.
 # -----------------------------
-# run command chmod 777 /etc/rancher/k3s/k3s.yaml on remote node
+- name: Fetch kubeconfig from remote node
+  ansible.builtin.fetch:
+    src: "/etc/rancher/k3s/k3s.yaml"
+    dest: "/tmp/k3s.yaml"
+    flat: yes
+  delegate_to: '{{remote_node_alias}}'
+  remote_user: <remote_target_user>
 
-    - name: chmod 777 /etc/rancher/k3s/k3s.yaml
-      ansible.builtin.command: sudo chmod 777 /etc/rancher/k3s/k3s.yaml
-      delegate_to: '{{remote_node_alias}}'
-      remote_user: <remote_target_user>
+- name: Replace localhost with remote IP in kubeconfig
+  replace:
+    path: "/tmp/k3s.yaml"
+    regexp: 'https://127.0.0.1:6443'
+    replace: 'https://{{remote_ip}}:6443' 
 
-    - name: Fetch kubeconfig from remote node
-      ansible.builtin.fetch:
-        src: "/etc/rancher/k3s/k3s.yaml"
-        dest: "/tmp/k3s.yaml"
-        flat: yes
-      delegate_to: '{{remote_node_alias}}'
-      remote_user: <remote_target_user>
-
-    - name: Replace localhost with remote IP in kubeconfig
-      replace:
-        path: "/tmp/k3s.yaml"
-        regexp: 'https://127.0.0.1:6443'
-        replace: 'https://{{remote_ip}}:6443' 
-
-    - name: Replace default with remote in kubeconfig
-      replace:
-        path: "/tmp/k3s.yaml"
-        regexp: 'default'
-        replace: 'remote'
+- name: Replace default with remote in kubeconfig
+  replace:
+    path: "/tmp/k3s.yaml"
+    regexp: 'default'
+    replace: 'remote'
