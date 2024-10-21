@@ -1,30 +1,36 @@
 ---
-# -----------------------------
 # This Ansible playbook installs the Liqo Dashboard on the cluster
-# -----------------------------
 
 - name: Clone LiqoDash repository
-  git:
-    repo: 'https://github.com/liqotech/dashboard'
+  ansible.builtin.git:
+    repo: 'https://github.com/zankro/liqo-dashboard-test.git'
     dest: '/tmp/dashboard'
-    version: 'master'
+    version: 'main'
 
-- name: Install LiqoDash with Helm 
-  shell: | 
-    export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-    helm install liqo-dashboard /tmp/dashboard/kubernetes/dashboard_chart
-    
+- name: Install LiqoDash with Helm using shell command
+  ansible.builtin.shell: |
+    helm install liqo-dashboard /tmp/dashboard/chart \
+      --kubeconfig /etc/rancher/k3s/k3s.yaml \
+      --namespace default \
+      --set backend.imageName="andreacv98/liqo-dashboard-backend" \
+      --set frontend.imageName="andreacv98/liqo-dashboard-frontend" \
+      --set image.tag="0.0.1"
+
+- name: Delete default LiqoDash ingress if exists
+  ansible.builtin.shell: |
+    kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml delete ingress liqo-dashboard-ingress --ignore-not-found=true
+
 - name: Copy Ingress Configuration File in home directory
   ansible.builtin.copy:
     src: ingress.yaml
     dest: "./liqo-ingress.yaml"
+    mode: "0644"
 
-- name: Apply Ingress Configuration File
-  ansible.builtin.command: kubectl apply -f liqo-ingress.yaml 
+- name: Apply Ingress Configuration YAML File
+  ansible.builtin.shell: |
+    kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f ./liqo-ingress.yaml
 
-  
-
-- name: Clean Ingress Configuration File
-  file:
+- name: Delete Ingress Configuration File Previously Copied
+  ansible.builtin.file:
     path: liqo-ingress.yaml
     state: absent
