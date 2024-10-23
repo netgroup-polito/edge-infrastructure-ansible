@@ -4,7 +4,7 @@
   ignore_errors: true
 
 - name: Download and extract liqoctl
-  shell: 'curl --fail -LS "https://github.com/liqotech/liqo/releases/download/v0.10.2/liqoctl-linux-amd64.tar.gz" | tar -xz'
+  shell: 'curl --fail -LS "https://github.com/liqotech/liqo/releases/download/v1.0.0-rc.2/liqoctl-linux-amd64.tar.gz" | tar -xz'
   when: liqoctl_already_installed != 0
 
 - name: Install liqoctl

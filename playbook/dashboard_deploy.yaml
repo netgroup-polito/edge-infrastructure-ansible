@@ -4,6 +4,8 @@
   hosts: localhost
   gather_facts: true
   become: true
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   pre_tasks:
     - name: Get k3s version
       ansible.builtin.command: k3s --version

@@ -8,6 +8,8 @@
 - name: Transfer kubeconfig from remote to local and prepare it
   hosts: localhost
   gather_facts: no
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
   roles:
     - role: liqo-get-kubeconfig-remote
