@@ -12,6 +12,8 @@
   hosts: localhost
   gather_facts: true
   become: true
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   pre_tasks:
 
     - name: Get OS language
@@ -25,6 +27,30 @@
       changed_when: false
       ignore_errors: true
 
+    - name: Get kubectl version
+      ansible.builtin.command: kubectl version --client --short
+      register: kubectl_version_output
+      changed_when: false
+      ignore_errors: true
+
+    - name: Get minikube version
+      ansible.builtin.command: minikube version
+      register: minikube_version_output
+      changed_when: false
+      ignore_errors: true
+
+    - name: Get MicroK8s version
+      ansible.builtin.command: microk8s version
+      register: microk8s_version_output
+      changed_when: false
+      ignore_errors: true
+
+    - name: Get OpenShift (oc) version
+      ansible.builtin.command: oc version
+      register: openshift_version_output
+      changed_when: false
+      ignore_errors: true
+
     - name : Get helm version
       ansible.builtin.command: helm version
       register: helm_version_output
@@ -33,9 +59,14 @@
 
   roles:
     - role: prereq
-      when: k3s_version_output.rc != 0 and (ansible_env.LANG.startswith('en') or ansible_env.LANG.startswith('C.UTF-8'))
+      when: k3s_version_output.rc != 0 and kubectl_version_output.rc != 0 and 
+            minikube_version_output.rc != 0 and microk8s_version_output.rc != 0 and
+            openshift_version_output.rc != 0 and
+            (ansible_env.LANG.startswith('en') or ansible_env.LANG.startswith('C.UTF-8'))
     - role: helm_installation
-      when: helm_version_output.rc != 0
+      when: k3s_version_output.rc != 0 and kubectl_version_output.rc != 0 and 
+            minikube_version_output.rc != 0 and microk8s_version_output.rc != 0 and
+            openshift_version_output.rc != 0
     - role: k3s
       when: k3s_version_output.rc != 0
     - role: nginx_installation
