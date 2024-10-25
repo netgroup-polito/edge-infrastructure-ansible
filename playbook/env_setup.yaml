@@ -59,13 +59,13 @@
 
   roles:
     - role: prereq
-      when: k3s_version_output.rc != 0 and kubectl_version_output.rc != 0 and 
-            minikube_version_output.rc != 0 and microk8s_version_output.rc != 0 and
+      when: k3s_version_output.rc != 0 or kubectl_version_output.rc != 0 or 
+            minikube_version_output.rc != 0 or microk8s_version_output.rc != 0 or
             openshift_version_output.rc != 0 and
             (ansible_env.LANG.startswith('en') or ansible_env.LANG.startswith('C.UTF-8'))
     - role: helm_installation
-      when: k3s_version_output.rc != 0 and kubectl_version_output.rc != 0 and 
-            minikube_version_output.rc != 0 and microk8s_version_output.rc != 0 and
+      when: k3s_version_output.rc != 0 or kubectl_version_output.rc != 0 or 
+            minikube_version_output.rc != 0 or microk8s_version_output.rc != 0 or
             openshift_version_output.rc != 0
     - role: k3s
       when: k3s_version_output.rc != 0
