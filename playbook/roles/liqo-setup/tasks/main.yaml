@@ -17,5 +17,5 @@
   ignore_errors: true
 
 - name: Install Liqo       
-  shell: 'sudo liqoctl install k3s --kubeconfig=/etc/rancher/k3s/k3s.yaml'
+  shell: 'sudo liqoctl install k3s --kubeconfig=/etc/rancher/k3s/k3s.yaml --enable-metrics'
   when: liqo_already_installed != 0
