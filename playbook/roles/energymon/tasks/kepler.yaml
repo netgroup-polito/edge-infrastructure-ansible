@@ -39,4 +39,12 @@
   shell: kubectl cp kepler_dashboard.json monitoring/{{ grafana_pod.stdout }}:/tmp/dashboards/kepler_dashboard.json
   when: helm_kepler_exists_result.rc != 0
 
-  
+- name: Import liqovirtualkubelet dashboard json
+  ansible.builtin.copy:
+    src: liqovirtualkubelet.json
+    dest: "./liqovirtualkubelet.json"
+  when: helm_kepler_exists_result.rc != 0
+
+- name: Install liqovirtualkubelet dashboard
+  shell: kubectl cp liqovirtualkubelet.json monitoring/{{ grafana_pod.stdout }}:/tmp/dashboards/liqovirtualkubelet.json
+  when: helm_kepler_exists_result.rc != 0
