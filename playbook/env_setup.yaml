@@ -70,9 +70,8 @@
     - role: k3s
       when: k3s_version_output.rc != 0
     - role: nginx_installation
-    - role: liqo-setup
     - role: energymon
-
+    - role: liqo-setup
 
 - name: DDNS updater setup
   hosts: remote_node

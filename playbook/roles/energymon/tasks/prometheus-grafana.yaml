@@ -35,6 +35,10 @@
 
 - name: Waiting for ingress controller startup
   shell: kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=60s
+  register: wait_result
+  retries: 3
+  delay: 10
+  until: wait_result.rc == 0
   when: helm_prometheus_exists_result.rc != 0
 
 - name: Helm {{ helm.prometheus_release_name }} release 
