@@ -41,6 +41,13 @@
   until: wait_result.rc == 0
   when: helm_prometheus_exists_result.rc != 0
 
+- name: Patch prometheus resource to update podMonitorSelector and serviceMonitorSelector
+  command: >
+    kubectl patch prometheus prometheus-kube-prometheus-prometheus -n monitoring --type=json
+    -p '[{"op": "replace", "path": "/spec/podMonitorSelector", "value": {}}, {"op": "replace", "path": "/spec/serviceMonitorSelector", "value": {}}]'
+  when: helm_prometheus_exists_result.rc != 0
+
+
 - name: Helm {{ helm.prometheus_release_name }} release 
   shell: helm --kubeconfig /etc/rancher/k3s/k3s.yaml install -f values.yaml {{ helm.prometheus_release_name }} prometheus-community/kube-prometheus-stack -n monitoring
   when: helm_prometheus_exists_result.rc != 0
