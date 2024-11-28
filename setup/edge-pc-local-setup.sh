@@ -158,7 +158,7 @@ else
   echo "Usage:
   Installation with liqo peering:
   sudo ./$(basename $0) <remote_target_ip> <remote_target_user> <remote_target_password>
-  Or without parameter for no Liqo peering."
+  Or no parameters to install Liqo without peerings, which have to be set up manually later."
   exit 1
 fi
 
