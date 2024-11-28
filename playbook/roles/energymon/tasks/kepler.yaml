@@ -37,6 +37,10 @@
 
 - name: Install kepler dashboard (4/4)
   shell: kubectl cp kepler_dashboard.json monitoring/{{ grafana_pod.stdout }}:/tmp/dashboards/kepler_dashboard.json
+  retries: 5
+  delay: 5
+  register: copy_result
+  until: copy_result.rc == 0
   when: helm_kepler_exists_result.rc != 0
 
 - name: Import liqonetwork dashboard json
