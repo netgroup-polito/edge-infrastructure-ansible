@@ -1,0 +1,85 @@
+## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+##
+grafana:
+  namespaceOverride: "monitoring"
+  adminPassword: <grafana_password>
+
+  ## Config to serve from sub_path https://github.com/prometheus-community/helm-charts/issues/201
+  ##
+  grafana.ini:
+    server:
+      domain: localhost
+      #This string will be substituted by the energymon role (look at prometheus-grafana.yaml) with the proper IP
+      root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana"
+      serve_from_sub_path: false
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      # Redirect /grafana to /grafana/
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        rewrite ^(/grafana)$ $1/ redirect;
+      # cert-manager.io/issuer: app-clusterissuer
+    labels: {}
+
+    hosts: []
+    # hosts:
+    #   - my.example.com
+
+    ## Path for grafana ingress, needs grafana.ini above since sub_path
+    ##
+    path: /grafana(/|$)(.*)
+
+    ## TLS configuration for grafana Ingress
+    ## Secret must be manually created in the namespace
+    ##
+    ## dummy-load-certificates ingress takes care of this in our case
+    ##
+    tls: []
+    # tls:
+    #   - secretName: app-certificate-secret
+    #     hosts:
+    #       - my.example.com
+
+prometheus:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+    hosts: []
+    # hosts:
+    #   - my.example.com
+
+    ## Paths to use for ingress rules - one path should match the prometheusSpec.routePrefix
+    ##
+    paths:
+      - /prometheus(/|$)(.*)
+
+    ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
+    ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
+    # pathType: ImplementationSpecific
+
+    ## TLS configuration for Prometheus Ingress
+    ## Secret must be manually created in the namespace
+    ##
+    tls: []
+    # tls:
+    #   - secretName: app-certificate-secret
+    #     hosts:
+    #       - my.example.com
+
+  ## Settings affecting prometheusSpec
+  ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#prometheusspec
+  ##
+  prometheusSpec:
+    ## External URL at which Prometheus will be reachable.
+    ##
+    externalUrl: ""
+    ## Prefix used to register routes, overriding externalUrl route.
+    ## Useful for proxies that rewrite URLs.
+    ##
+    routePrefix: /
