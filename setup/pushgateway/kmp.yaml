@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: push-metrics-script
+  namespace: monitoring
+data:
+  push_metrics.py: |
+    from prometheus_api_client import PrometheusConnect
+    import requests
+    import time
+
+    # Configuration
+    PROMETHEUS_URL = "http://{{ localip }}/prometheus"
+    PUSHGATEWAY_URL = "http://{{ remoteip }}:30091/metrics/job/kepler_metrics"
+    QUERY = '{__name__=~".*(kepler|total_energy_consumed|energy_from_grid|solar_panel_energy|total_energy_to_grid).*"}'
+    PUSH_INTERVAL_SECONDS = 60
+
+    # Initialize Prometheus connection
+    prom = PrometheusConnect(url=PROMETHEUS_URL, disable_ssl=True)
+
+    def fetch_metrics(query):
+        try:
+            return prom.custom_query(query)
+        except Exception as e:
+            print(f"Error querying Prometheus: {e}")
+            return []
+
+    def delete_previous_metrics():
+        try:
+            # Send a DELETE request to the Pushgateway to clear old metrics
+            response = requests.delete(PUSHGATEWAY_URL)
+            print("Previous metrics deleted successfully")
+        except Exception as e:
+            print(f"Error deleting metrics from Pushgateway: {e}")
+
+    def push_to_gateway(metrics):
+        # Define the full Pushgateway endpoint with job name
+        push_url = PUSHGATEWAY_URL
+
+        payload = ""
+        for metric in metrics:
+            name = metric['metric'].get('__name__', 'unknown_metric')
+            labels = ",".join([f'{key}="{value}"' for key, value in metric['metric'].items() if key != '__name__'])
+            value = metric['value'][1]
+            payload += f"{name}{{{labels}}} {value}\n"
+
+        try:
+            # Push the metrics via POST to the correct endpoint
+            response = requests.post(push_url, data=payload, headers={"Content-Type": "text/plain"})
+            if response.status_code == 200:
+                print("Metrics pushed successfully")
+            else:
+                print(f"Failed to push metrics: {response.status_code} {response.text}")
+        except Exception as e:
+            print(f"Error pushing to Pushgateway: {e}")
+
+    if __name__ == "__main__":
+        while True:
+            delete_previous_metrics()  # Delete old metrics
+            metrics = fetch_metrics(QUERY)
+            push_to_gateway(metrics)
+            time.sleep(PUSH_INTERVAL_SECONDS)
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kepler-metrics-pusher
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kepler-metrics-pusher
+  template:
+    metadata:
+      labels:
+        app: kepler-metrics-pusher
+    spec:
+      containers:
+      - name: metrics-pusher
+        image: python:3.9-slim
+        command:
+        - sh
+        - -c
+        - |
+          pip install prometheus-api-client requests &&
+          python /app/push_metrics.py
+        volumeMounts:
+        - name: scripts
+          mountPath: /app
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+      volumes:
+      - name: scripts
+        configMap:
+          name: push-metrics-script
+      restartPolicy: Always
