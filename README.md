@@ -173,6 +173,91 @@ The release name can be found and configured in the config file located at ```pl
 
 After successfully uninstalling the release, relaunch the ansible script. The script will detect the missing part and proceed with the installation.
 
+# Setting up Prometheus Pushgateway in Edge-to-Cloud Infrastructure
+
+Prometheus Pushgateway is a service that allows ephemeral or batch jobs to push their metrics to Prometheus. Unlike typical Prometheus scraping, where Prometheus pulls metrics directly from monitored targets, the Pushgateway enables metrics to be pushed when a job's lifecycle is too short for Prometheus to scrape. It acts as an intermediary, exposing these pushed metrics for Prometheus to collect during its regular scrape intervals.
+
+This is particularly useful for monitoring batch jobs, cron tasks, or any other processes that do not have a persistent runtime. However, it is not intended for long-lived services, as it does not replace Prometheus' primary pull-based architecture.
+
+This guide provides detailed instructions for setting up Prometheus Pushgateway in the central cluster and configuring edge clusters to push metrics.
+
+---
+
+## Overview
+
+The Prometheus Pushgateway allows ephemeral and batch jobs on edge clusters to expose metrics to Prometheus in the central cluster. The setup involves:
+
+1. **Central Cluster Configuration**: Deploy and configure Prometheus Pushgateway.
+2. **Edge Cluster Configuration**: Push metrics from edge clusters to the Pushgateway.
+
+---
+
+## Central Cluster Setup
+
+### Prerequisites
+
+- A functional Kubernetes cluster (central cluster) with Prometheus installed.
+- Access to the kubeconfig file for the central cluster.
+
+### Steps
+
+   ```bash
+   curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/pushgateway/pushgateway.sh > pushgateway.sh
+   
+   sudo chmod +x pushgateway.sh
+
+   sudo ./pushgateway.sh
+   ```
+
+## Edge Cluster Setup
+
+### Prerequisites
+
+- A functional edge Kubernetes cluster.
+- Access to the kubeconfig file for the edge cluster.
+- Central cluster Pushgateway IP address.
+
+### Steps
+
+   ```bash
+   curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/pushgateway/kmp.sh > kmp.sh
+   
+   sudo chmod +x kmp.sh
+
+   sudo ./kmp.sh <pushgateway_ip_address>
+   ```
+
+### How the Metrics Push Works
+
+- Queries the local Prometheus instance for metrics matching a specific query (which is kepler in this case).
+- Deletes outdated metrics from the Pushgateway.
+- Pushes new metrics to the Pushgateway using HTTP POST requests.
+
+## Verification
+
+### Central cluster
+
+1. **Check that the Pushgateway is running**:
+   ```bash
+   kubectl get pods -n monitoring -l app=pushgateway
+   ```
+2. **Verify that Prometheus is scraping metrics from the Pushgateway**:
+   - Access the Prometheus UI.
+   - Navigate to the **Targets** page.
+   - Confirm the `pushgateway` job is listed and active.
+
+### Edge cluster
+
+1. **Verify the edge metrics pusher deployment:**:
+   ```bash
+   kubectl get pods -n monitoring -l app=kepler-metrics-pusher
+   ```
+
+2. **Check logs to ensure metrics are being pushed:**:
+   ```bash
+   kubectl logs -n monitoring <metrics-pusher-pod-name>
+   ```
+
 # Liqo In-Band peering - Cloud Continuum
 
 Cloud Continuum is a project aimed at seamlessly connecting home resources with cloud services, creating a unified virtual space for resources and services across domestic servers and cloud providers. This initiative enables fluid resource allocation, enhanced data redundancy, and ease of maintenance and monitoring of applications.
