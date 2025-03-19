@@ -28,7 +28,7 @@
       --enable-metrics \
       --set controllerManager.metrics.serviceMonitor.enabled=true \
       --set metrics.prometheusOperator.enabled=true
-  when: liqo_already_installed.rc != 0liqoc
+  when: liqo_already_installed.rc != 0
   become: yes
 
 - name: Delete prometheus pod to apply changes
