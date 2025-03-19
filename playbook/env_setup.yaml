@@ -72,6 +72,8 @@
     - role: nginx_installation
     - role: energymon
     - role: liqo-setup
+    - role: kubevirt
+      when: install_kubevirt | default(false) | bool
 
 - name: DDNS updater setup
   hosts: remote_node
