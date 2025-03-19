@@ -1,0 +1,7 @@
+---
+# defaults file for kubevirt-setup
+# KubeVirt version 
+kubevirt_version: "0.59.0"
+
+# Dashboard (manager) 
+kubevirt_dashboard_manifest_url: "https://raw.githubusercontent.com/kubevirt/kubevirt.github.io/main/labs/manifests/kubevirt-manager.yaml"

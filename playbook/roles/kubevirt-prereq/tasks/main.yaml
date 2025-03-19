@@ -1,0 +1,23 @@
+---
+
+- name: Ensure python3 and pip3 are installed on localhost
+  become: true
+  package:
+    name:
+      - python3
+      - python3-pip
+    state: present
+  delegate_to: localhost
+  tags:
+    - kubevirt
+
+- name: Ensure python3-kubernetes is installed on localhost
+  pip:
+    name: kubernetes
+    state: present
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  delegate_to: localhost
+  tags:
+    - kubevirt

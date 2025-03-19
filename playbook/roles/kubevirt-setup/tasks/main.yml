@@ -1,0 +1,82 @@
+---
+- name: "Create or ensure the 'kubevirt' namespace exists"
+  ansible.builtin.k8s:
+    state: present
+    kind: Namespace
+    name: kubevirt
+  tags:
+    - kubevirt
+
+- name: "Install KubeVirt Operator"
+  ansible.builtin.command:
+    cmd: kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/v{{ kubevirt_version }}/kubevirt-operator.yaml"
+  register: operator_install
+  changed_when: "'created' in operator_install.stdout or 'configured' in operator_install.stdout"
+  failed_when: operator_install.rc != 0 and 'unchanged' not in operator_install.stdout
+  tags:
+    - kubevirt
+
+- name: "Install KubeVirt CR (enables KubeVirt in the cluster)"
+  ansible.builtin.command:
+    cmd: kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/v{{ kubevirt_version }}/kubevirt-cr.yaml"
+  register: cr_install
+  changed_when: "'created' in cr_install.stdout or 'configured' in cr_install.stdout"
+  failed_when: cr_install.rc != 0 and 'unchanged' not in cr_install.stdout
+  tags:
+    - kubevirt
+
+- name: "Wait for KubeVirt to become Available"
+  shell: |
+    kubectl -n kubevirt get kv kubevirt -o json 2>/dev/null || echo '{}'
+  register: kv_status
+  retries: 5   # Tentativi massimi
+  delay: 5     # Pausa di 5 secondi tra i tentativi
+  until: >
+    kv_status.stdout != "{}" and
+    (kv_status.stdout | from_json | json_query("status.conditions[?type=='Available'].status")) == ["True"]
+  failed_when: >
+    kv_status.stdout == "{}" or
+    (kv_status.stdout | from_json | json_query("status.conditions[?type=='Degraded'].status")) == ["True"] or
+    (kv_status.stdout | from_json | json_query("status.conditions[?type=='Failure'].status")) == ["True"]
+  tags:
+    - kubevirt
+
+
+- name: "Download and install virtctl CLI (KubeVirt command line)"
+  ansible.builtin.get_url:
+    url: "https://github.com/kubevirt/kubevirt/releases/download/v{{ kubevirt_version }}/virtctl-v{{ kubevirt_version }}-linux-amd64"
+    dest: "/usr/local/bin/virtctl"
+    mode: '0755'
+  tags:
+    - kubevirt
+
+- name: "Install the KubeVirt Manager UI"
+  ansible.builtin.k8s:
+    state: present
+    src: "{{ kubevirt_dashboard_manifest_url }}"
+  register: ui_install
+  changed_when: ui_install.changed
+  failed_when: ui_install.failed
+  tags:
+    - kubevirt
+
+- name: "Create a NodePort Service for kubevirt-manager"
+  ansible.builtin.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: kubevirt-manager-service
+        namespace: kubevirt
+      spec:
+        type: NodePort
+        selector:
+          app: kubevirt-manager
+        ports:
+          - protocol: TCP
+            port: 80
+            targetPort: 80
+            nodePort: 30080
+  tags:
+    - kubevirt
