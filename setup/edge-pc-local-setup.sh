@@ -137,8 +137,6 @@ print_end_message() {
         write_separate_line
         write_row "Prometheus" "http://$1/prometheus/graph" "Not required"
         write_separate_line
-        write_row "KubeVirt" "http://$1/kubevirt" "Not required"
-        write_separate_line
 }
 
 
@@ -290,24 +288,8 @@ if [ $# -eq 3 ]; then
   runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_outgoing_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory'
 fi
 
-
-################################################
-#          STEP 6: KubeVirt                    #
-################################################
-
-read -p "Do you want to install KubeVirt ? (y/n) " choice
-if [[ "$choice" == "y" ]]; then
-    export INSTALL_KUBEVIRT=true
-else
-    export INSTALL_KUBEVIRT=false
-fi
-
-runuser -l mgmt -c "ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml -e install_kubevirt=$INSTALL_KUBEVIRT -i /home/mgmt/edge-infrastructure-ansible-main/inventory"
-
-
-
 ######################################
-#          STEP 7: Clean             #
+#          STEP 6: Clean             #
 ######################################
 while true; do
   read -p "Do you want to delete the ansible script located in /home/mgmt/edge-infrastructure-ansible-main? (y/n) " answer
@@ -328,7 +310,7 @@ while true; do
 done
 
 ################################################
-#          STEP 8: Password change             #
+#          STEP 7: Password change             #
 ################################################
 MGMT_USER_PSW_ASK_STRING="The user 'mgmt' has been created and used for the installation.
 The default password is: root
@@ -347,4 +329,3 @@ local_ip=$(hostname -I | awk '{print $1}')
 print_end_message "$local_ip" "$GRAFANA_PSW"
 echo ""
 echo "Installation completed."
-
