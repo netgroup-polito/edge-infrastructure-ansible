@@ -50,13 +50,45 @@
   tags:
     - kubevirt
 
-- name: "Install the KubeVirt Manager UI"
-  ansible.builtin.k8s:
+- name: "Create namespace for KubeVirt Manager UI"
+  kubernetes.core.k8s:
     state: present
-    src: "{{ kubevirt_dashboard_manifest_url }}"
-  register: ui_install
-  changed_when: ui_install.changed
-  failed_when: ui_install.failed
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/ns.yaml"
+  tags:
+    - kubevirt
+
+- name: "Apply Custom Resource Definition for KubeVirt Manager"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/crd.yaml"
+  tags:
+    - kubevirt
+
+- name: "Apply RBAC configuration for KubeVirt Manager"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/rbac.yaml"
+  tags:
+    - kubevirt
+
+- name: "Deploy KubeVirt Manager UI frontend"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/deployment.yaml"
+  tags:
+    - kubevirt
+
+- name: "Apply priority classes for KubeVirt Manager"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/pc.yaml"
+  tags:
+    - kubevirt
+
+- name: "Create Service for KubeVirt Manager UI"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/service.yaml"
   tags:
     - kubevirt
 
