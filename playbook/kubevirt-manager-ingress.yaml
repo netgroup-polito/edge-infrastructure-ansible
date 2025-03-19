@@ -1,0 +1,27 @@
+- name: "Create an Ingress for KubeVirt API"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: kubevirt-api-ingress
+        namespace: kubevirt
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /
+          nginx.ingress.kubernetes.io/ssl-redirect: "false"  
+      spec:
+        ingressClassName: nginx
+        rules:
+        - host: kubevirt.local
+          http:
+            paths:
+            - path: /apis
+              pathType: Prefix
+              backend:
+                service:
+                  name: virt-api
+                  port:
+                    number: 443  
+  tags:
+    - kubevirt

@@ -29,8 +29,8 @@
   shell: |
     kubectl -n kubevirt get kv kubevirt -o json 2>/dev/null || echo '{}'
   register: kv_status
-  retries: 5   # Tentativi massimi
-  delay: 5     # Pausa di 5 secondi tra i tentativi
+  retries: 5   
+  delay: 10
   until: >
     kv_status.stdout != "{}" and
     (kv_status.stdout | from_json | json_query("status.conditions[?type=='Available'].status")) == ["True"]
@@ -92,29 +92,8 @@
   tags:
     - kubevirt
 
-- name: "Create an Ingress for KubeVirt Manager"
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: networking.k8s.io/v1
-      kind: Ingress
-      metadata:
-        name: kubevirt-manager-ingress
-        namespace: kubevirt-manager
-        annotations:
-          nginx.ingress.kubernetes.io/rewrite-target: /
-      spec:
-        rules:
-        - host: kubevirt.local
-          http:
-            paths:
-            - path: /
-              pathType: Prefix
-              backend:
-                service:
-                  name: kubevirt-manager
-                  port:
-                    number: 8080
+- import_tasks: ingress.yaml
   tags:
     - kubevirt
+
 
