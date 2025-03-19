@@ -5,3 +5,12 @@
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
       sudo apt-get update
       sudo apt-get install helm
+      
+- name: Ensure Helm repository file exists
+  copy:
+    content: ""
+    dest: /tmp/.helmrepo
+    owner: root
+    group: root
+    mode: '0777'
+  become: yes

@@ -4,5 +4,5 @@
 #
     - name: In-band control peering
       shell: | 
-            export KUBECONFIG=/etc/rancher/k3s/merged_kubeconfig.yaml
-            liqoctl peer in-band --context=default --remote-context=remote
+        export KUBECONFIG=/etc/rancher/k3s/merged_kubeconfig.yaml
+        liqoctl peer --remote-kubeconfig /tmp/k3s.yaml
