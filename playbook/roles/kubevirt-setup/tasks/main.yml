@@ -92,23 +92,29 @@
   tags:
     - kubevirt
 
-- name: "Create a NodePort Service for kubevirt-manager"
-  ansible.builtin.k8s:
+- name: "Create an Ingress for KubeVirt Manager"
+  kubernetes.core.k8s:
     state: present
     definition:
-      apiVersion: v1
-      kind: Service
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
       metadata:
-        name: kubevirt-manager-service
-        namespace: kubevirt
+        name: kubevirt-manager-ingress
+        namespace: kubevirt-manager
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /
       spec:
-        type: NodePort
-        selector:
-          app: kubevirt-manager
-        ports:
-          - protocol: TCP
-            port: 80
-            targetPort: 80
-            nodePort: 30080
+        rules:
+        - host: kubevirt.local
+          http:
+            paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: kubevirt-manager
+                  port:
+                    number: 8080
   tags:
     - kubevirt
+
