@@ -6,11 +6,3 @@
       sudo apt-get update
       sudo apt-get install helm
       
-- name: Ensure Helm repository file exists
-  copy:
-    content: ""
-    dest: /tmp/.helmrepo
-    owner: root
-    group: root
-    mode: '0777'
-  become: yes
