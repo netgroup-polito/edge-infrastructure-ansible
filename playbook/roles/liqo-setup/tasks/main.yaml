@@ -4,17 +4,12 @@
   ignore_errors: true
 
 - name: Download and extract liqoctl
-  shell: |
-    curl -LO "https://github.com/liqotech/liqo/releases/download/v1.0.0/liqoctl-linux-amd64.tar.gz"
-    tar -xzf liqoctl-linux-amd64.tar.gz
-  when: liqoctl_already_installed.rc != 0
+  shell: 'curl --fail -LS "https://github.com/liqotech/liqo/releases/download/v1.0.0/liqoctl-linux-amd64.tar.gz"| tar -xz'   
+  when: liqoctl_already_installed != 0
 
 - name: Install liqoctl
-  shell: |
-    sudo install -o root -g root -m 0755 liqoctl /usr/local/bin/liqoctl
-    ln -sf /usr/local/bin/liqoctl /usr/bin/liqoctl
-  when: liqoctl_already_installed.rc != 0
-  become: yes
+  shell: 'sudo install -o root -g root -m 0755 liqoctl /usr/local/bin/liqoctl'
+  when: liqoctl_already_installed != 0
 
 - name: Check if liqo is already installed
   shell: liqoctl version
@@ -22,16 +17,9 @@
   ignore_errors: true
 
 - name: Install Liqo       
-  shell: |
-    sudo liqoctl install k3s \
-      --kubeconfig=/etc/rancher/k3s/k3s.yaml \
-      --enable-metrics \
-      --set controllerManager.metrics.serviceMonitor.enabled=true \
-      --set metrics.prometheusOperator.enabled=true
-  when: liqo_already_installed.rc != 0
-  become: yes
+  shell: 'sudo liqoctl install k3s --kubeconfig=/etc/rancher/k3s/k3s.yaml --enable-metrics --set controllerManager.metrics.serviceMonitor.enabled=true --set metrics.prometheusOperator.enabled=true'
+  when: liqo_already_installed != 0
 
 - name: Delete prometheus pod to apply changes
   command: kubectl delete pods -n monitoring prometheus-prometheus-kube-prometheus-prometheus-0
   when: helm_prometheus_exists_result.rc != 0
-
