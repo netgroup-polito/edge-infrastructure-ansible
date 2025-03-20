@@ -236,7 +236,7 @@ fi
 #########################################
 echo -n "Downloading Ansible script.."
 cd /home/mgmt/
-
+#for testing
 #curl -LO https://github.com/netgroup-polito/edge-infrastructure-ansible/archive/refs/heads/main.zip
 curl -LO https://github.com/Aleint/edge-infrastructure-ansible/archive/refs/heads/test.zip
 
@@ -247,9 +247,12 @@ else
   echo "KO, exiting"
   exit 1
 fi
-
-unzip main.zip
-rm main.zip
+#for testing
+unzip test.zip
+mv edge-infrastructure-ansible-test edge-infrastructure-ansible-main
+rm test.zip
+#unzip main.zip
+#rm main.zip
 
 #############################################
 #   STEP 4: Substitute remote target ip     #
