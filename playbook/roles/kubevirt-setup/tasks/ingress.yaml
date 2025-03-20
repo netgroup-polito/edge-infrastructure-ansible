@@ -8,18 +8,18 @@
         name: kubevirt-manager-ingress
         namespace: kubevirt-manager
         annotations:
-          nginx.ingress.kubernetes.io/rewrite-target: /
+          kubernetes.io/ingress.class: "nginx"
+          nginx.ingress.kubernetes.io/rewrite-target: "/"
       spec:
         rules:
-        - host: kubevirt.local
-          http:
-            paths:
-            - path: /
-              pathType: Prefix
-              backend:
-                service:
-                  name: kubevirt-manager
-                  port:
-                    number: 8080
+          - http:
+              paths:
+                - path: /kubevirt
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: kubevirt-manager
+                      port:
+                        number: 8080
   tags:
     - kubevirt

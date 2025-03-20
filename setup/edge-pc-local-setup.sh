@@ -237,7 +237,8 @@ fi
 echo -n "Downloading Ansible script.."
 cd /home/mgmt/
 
-curl -LO https://github.com/netgroup-polito/edge-infrastructure-ansible/archive/refs/heads/main.zip
+#curl -LO https://github.com/netgroup-polito/edge-infrastructure-ansible/archive/refs/heads/main.zip
+curl -LO https://github.com/Aleint/edge-infrastructure-ansible/archive/refs/heads/test.zip
 
 #Check repo installation outcome
 if [ $? -eq 0 ]; then
@@ -272,9 +273,20 @@ else
   sed -i "s/<grafana_password>/$GRAFANA_PSW/g" /home/mgmt/edge-infrastructure-ansible-main/playbook/roles/energymon/files/values.yaml
 fi
 
+###########################################
+#          STEP 5: KubeVirt               #
+###########################################
+
+read -p "Do you want to install KubeVirt? (y/n) " choice
+if [[ "$choice" =~ ^[Yy]$ ]]; then
+    export INSTALL_KUBEVIRT=true
+else
+    export INSTALL_KUBEVIRT=false
+fi
+
 
 ######################################
-#   STEP 5: Start ansible script     #
+#   STEP 6: Start ansible script     #
 ######################################
 echo "Running Ansible script.."
 
@@ -282,27 +294,16 @@ echo "Running Ansible script.."
 echo "mgmt ALL=(ALL) NOPASSWD:ALL" | EDITOR='tee -a' visudo
 
 runuser -l mgmt -c 'ansible-galaxy collection install -r /home/mgmt/edge-infrastructure-ansible-main/requirements.yml'
-runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory'
+runuser -l mgmt -c "ansible-playbook \
+  /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml \
+  -e install_kubevirt=$INSTALL_KUBEVIRT \
+  -i /home/mgmt/edge-infrastructure-ansible-main/inventory"
 runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/dashboard_deploy.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory'
 
 if [ $# -eq 3 ]; then
   runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_incoming_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory'
   runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_outgoing_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory'
 fi
-
-
-################################################
-#          STEP 6: KubeVirt                    #
-################################################
-
-read -p "Do you want to install KubeVirt ? (y/n) " choice
-if [[ "$choice" == "y" ]]; then
-    export INSTALL_KUBEVIRT=true
-else
-    export INSTALL_KUBEVIRT=false
-fi
-
-runuser -l mgmt -c "ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml -e install_kubevirt=$INSTALL_KUBEVIRT -i /home/mgmt/edge-infrastructure-ansible-main/inventory"
 
 
 
