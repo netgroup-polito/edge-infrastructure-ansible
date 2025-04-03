@@ -76,6 +76,7 @@
       when: install_kubevirt | bool
     - role: kubevirt-setup
       when: install_kubevirt | bool
+    - role: default_page
 
 - name: DDNS updater setup
   hosts: remote_node

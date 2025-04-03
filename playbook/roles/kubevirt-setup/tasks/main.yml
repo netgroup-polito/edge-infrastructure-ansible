@@ -92,8 +92,21 @@
   tags:
     - kubevirt
 
-- import_tasks: ingress.yaml
+- name: "Apply ingress for KubeVirt Manager"
+  kubernetes.core.k8s:
+    state: present
+    src: "roles/kubevirt-setup/files/ingress.yaml"
   tags:
     - kubevirt
+
+- name: "Add kubevirt.local in /etc/hosts"
+  become: true
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^.*kubevirt.local'
+    line: "{{ ansible_default_ipv4.address }} kubevirt.local"
+    state: present
+  tags:
+      - kubevirt
 
 
