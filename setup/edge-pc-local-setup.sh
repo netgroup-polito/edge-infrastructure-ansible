@@ -137,7 +137,7 @@ print_end_message() {
         write_separate_line
         write_row "Prometheus" "http://$1/prometheus/graph" "Not required"
         write_separate_line
-        write_row "KubeVirt" "http://$1/kubevirt" "Not required"
+        write_row "KubeVirt" "http://kubevirt.local" "Not required"
         write_separate_line
 }
 
