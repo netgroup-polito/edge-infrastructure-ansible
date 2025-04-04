@@ -1,17 +1,21 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: page-ingress
+  name: defaultpage-ingress
+  namespace: default
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1 
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^(/default)$ $1/ redirect;
 spec:
   rules:
-     - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: defaultpage-service 
-                port:
+  - http:
+      paths:
+      - path: /default(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: defaultpage-service
+            port:
                   number: 8000
