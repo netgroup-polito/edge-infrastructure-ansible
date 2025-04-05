@@ -73,9 +73,10 @@
     - role: energymon
     - role: liqo-setup
     - role: kubevirt-prereq
-      when: install_kubevirt | bool
+      when: (install_kubevirt | default(false)) | bool
     - role: kubevirt-setup
-      when: install_kubevirt | bool
+      when: (install_kubevirt | default(false)) | bool
+
     - role: default_page
 
 - name: DDNS updater setup
