@@ -1,5 +1,4 @@
 ---
 # defaults file for kubevirt-setup
 # KubeVirt version 
-kubevirt_version: "0.59.0"
-
+kubevirt_version: "1.5.0"
