@@ -348,7 +348,7 @@ ansible-playbook -i inventory ./playbook/env_setup.yaml --ask-become-pass -e "in
 
 #### Installation of Only KubeVirt Components
 
-If you wish to install only the KubeVirt components (without the full environment setup), you can target the specific tasks using the `kubevirt` tag:
+If you wish to install only the KubeVirt components (without the full environment setup such as Liqo, etc), you can target the KubeVirt-specific tasks using the `kubevirt` tag:
 
 ```bash
 ansible-playbook -i inventory ./playbook/env_setup.yaml --tags kubevirt --ask-become-pass -e "install_kubevirt=true"
