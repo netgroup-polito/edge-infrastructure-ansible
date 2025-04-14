@@ -307,7 +307,7 @@ This section describes how to install **KubeVirt** and the **KubeVirt Manager UI
 **KubeVirt Version**:  
 The default KubeVirt version is set in the role defaults file (`playbook/roles/kubevirt-setup/defaults/main.yml`) as:
 ```yaml
-kubevirt_version: "0.59.0"
+kubevirt_version: "1.5.0"
 ```
 
 ### Overview
