@@ -300,3 +300,56 @@ ansible-playbook playbook/liqo_outgoing_peering.yaml -i inventory
 ansible-playbook playbook/liqo_incoming_peering_out.yaml -i inventory
 ```
 
+## Optional Installation of KubeVirt and KubeVirt Manager
+
+This section describes how to install **KubeVirt** and the **KubeVirt Manager UI**. The installation is fully integrated into the environment setup playbook and can be activated either by responding with `y` when prompted during the script execution or by setting the variable `install_kubevirt=true`.
+
+**KubeVirt Version**:  
+The default KubeVirt version is set in the role defaults file (`playbook/roles/kubevirt-setup/defaults/main.yml`) as:
+```yaml
+kubevirt_version: "1.5.0"
+```
+
+### Overview
+
+When enabled, the installation process includes the following steps:
+
+1. **Prerequisite Check**  
+   The `kubevirt-prereq` role ensures that essential packages such as Python 3, pip3, and the Python Kubernetes client are installed. This is achieved via a dedicated task file that verifies and installs the required dependencies (see `playbook/roles/kubevirt-prereq/tasks/main.yaml`).
+
+2. **KubeVirt Operator and CR Installation**  
+   The `kubevirt-setup` role starts by creating the necessary Kubernetes namespace and deploying the KubeVirt Operator and its Custom Resource (CR). These are applied from the official KubeVirt GitHub releases. The version can be configured in the defaults file (`playbook/roles/kubevirt-setup/defaults/main.yml`; tasks are in `playbook/roles/kubevirt-setup/tasks/main.yml`).
+
+3. **Waiting for KubeVirt Availability**  
+   After deploying the operator and CR, the playbook waits until KubeVirt is fully available by checking the status conditions. This ensures that the virtualization environment is ready before proceeding.
+
+4. **Installation of `virtctl` CLI**  
+   The playbook downloads and installs the `virtctl` command-line tool from the KubeVirt releases, allowing users to manage virtual machine instances directly from the terminal.
+
+5. **KubeVirt Manager UI Setup**  
+   In addition to KubeVirt core components, the playbook sets up the KubeVirt Manager UI by:
+   - Creating a dedicated namespace for the UI.
+   - Applying the necessary Custom Resource Definitions (CRDs), RBAC configurations, and deployment manifests.
+   - Configuring priority classes and creating a service for the UI.
+   - Deploying an Ingress resource (defined in `playbook/roles/kubevirt-setup/files/ingress.yaml`) to expose the KubeVirt Manager at the host `kubevirt.local`.
+   - Automatically adding an entry to the `/etc/hosts` file, mapping `kubevirt.local` to the local node's IP address. Note: this step is required because of a bug in the KubeVirt Manager, as shown in the issue reported here: [https://github.com/kubevirt-manager/kubevirt-manager/issues/99](https://github.com/kubevirt-manager/kubevirt-manager/issues/99#issuecomment-2807348597)
+
+### Enabling the Installation
+
+The KubeVirt components are installed as part of the main environment setup playbook (`env_setup.yaml`). They are executed conditionally only when the variable `install_kubevirt=true` is set.
+
+#### Full Local Installation Including KubeVirt
+
+To perform a complete local installation that includes KubeVirt and the KubeVirt Manager UI, run:
+
+```bash
+ansible-playbook -i inventory ./playbook/env_setup.yaml --ask-become-pass -e "install_kubevirt=true"
+```
+
+#### Installation of Only KubeVirt Components
+
+If you wish to install only the KubeVirt components (without the full environment setup such as Liqo, etc), you can target the KubeVirt-specific tasks using the `kubevirt` tag:
+
+```bash
+ansible-playbook -i inventory ./playbook/env_setup.yaml --tags kubevirt --ask-become-pass -e "install_kubevirt=true"
+```

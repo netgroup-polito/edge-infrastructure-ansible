@@ -1,0 +1,118 @@
+---
+- name: "Create or ensure the 'kubevirt' namespace exists"
+  ansible.builtin.k8s:
+    state: present
+    kind: Namespace
+    name: kubevirt
+  tags:
+    - kubevirt
+
+- name: "Install KubeVirt Operator"
+  ansible.builtin.command:
+    cmd: kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/v{{ kubevirt_version }}/kubevirt-operator.yaml"
+  register: operator_install
+  changed_when: "'created' in operator_install.stdout or 'configured' in operator_install.stdout"
+  failed_when: operator_install.rc != 0 and 'unchanged' not in operator_install.stdout
+  tags:
+    - kubevirt
+
+- name: "Install KubeVirt CR"
+  ansible.builtin.command:
+    cmd: kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/v{{ kubevirt_version }}/kubevirt-cr.yaml"
+  register: cr_install
+  changed_when: "'created' in cr_install.stdout or 'configured' in cr_install.stdout"
+  failed_when: cr_install.rc != 0 and 'unchanged' not in cr_install.stdout
+  tags:
+    - kubevirt
+
+- name: "Wait for KubeVirt to become Available"
+  shell: |
+    kubectl -n kubevirt get kv kubevirt -o json 2>/dev/null || echo '{}'
+  register: kv_status
+  retries: 5   
+  delay: 10
+  until: >
+    kv_status.stdout != "{}" and
+    (kv_status.stdout | from_json | json_query("status.conditions[?type=='Available'].status")) == ["True"]
+  failed_when: >
+    kv_status.stdout == "{}" or
+    (kv_status.stdout | from_json | json_query("status.conditions[?type=='Degraded'].status")) == ["True"] or
+    (kv_status.stdout | from_json | json_query("status.conditions[?type=='Failure'].status")) == ["True"]
+  tags:
+    - kubevirt
+
+
+- name: "Download and install virtctl CLI (KubeVirt command line)"
+  ansible.builtin.get_url:
+    url: "https://github.com/kubevirt/kubevirt/releases/download/v{{ kubevirt_version }}/virtctl-v{{ kubevirt_version }}-linux-amd64"
+    dest: "/usr/local/bin/virtctl"
+    mode: '0755'
+  tags:
+    - kubevirt
+
+- name: "Create namespace for KubeVirt Manager UI"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/ns.yaml"
+  tags:
+    - kubevirt
+
+- name: "Apply Custom Resource Definition for KubeVirt Manager"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/crd.yaml"
+  tags:
+    - kubevirt
+
+- name: "Apply RBAC configuration for KubeVirt Manager"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/rbac.yaml"
+  tags:
+    - kubevirt
+
+- name: "Deploy KubeVirt Manager UI frontend"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/deployment.yaml"
+  tags:
+    - kubevirt
+
+- name: "Apply priority classes for KubeVirt Manager"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/pc.yaml"
+  tags:
+    - kubevirt
+
+- name: "Create Service for KubeVirt Manager UI"
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/service.yaml"
+  tags:
+    - kubevirt
+
+- name: "Apply ingress for KubeVirt Manager"
+  kubernetes.core.k8s:
+    state: present
+    src: "roles/kubevirt-setup/files/ingress.yaml"
+  tags:
+    - kubevirt
+
+# We tried exposing the KubeVirt Manager UI under a subpath (e.g., /kubevirt), like the other dashboards, 
+# but it caused routing issues and conflicts with existing UIs.
+# To avoid these conflicts and simplify access, the KubeVirt UI is exposed
+# through a dedicated hostname (kubevirt.local) and we need to add the
+# corresponding mapping to /etc/hosts via Ansible.
+# This way, the dashboard remains isolated and does not interfere with other services.
+- name: "Add kubevirt.local in /etc/hosts"
+  become: true
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^.*kubevirt.local'
+    line: "{{ ansible_default_ipv4.address }} kubevirt.local"
+    state: present
+  tags:
+      - kubevirt
+
+

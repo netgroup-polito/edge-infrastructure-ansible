@@ -129,13 +129,15 @@ print_end_message() {
         write_separate_line
         write_row "Dashboard" "URL" "Password"
         write_separate_line
-        write_row "General" "http://$1/" "Not required"
+        write_row "General" "http://$1/default" "Not required"
         write_separate_line
         write_row "K3S" "http://$1/k3sdashboard" "Check README.md"
         write_separate_line
         write_row "Grafana" "http://$1/grafana" "$2"
         write_separate_line
         write_row "Prometheus" "http://$1/prometheus/graph" "Not required"
+        write_separate_line
+        write_row "KubeVirt" "http://kubevirt.local" "Not required"
         write_separate_line
 }
 
@@ -270,9 +272,20 @@ else
   sed -i "s/<grafana_password>/$GRAFANA_PSW/g" /home/mgmt/edge-infrastructure-ansible-main/playbook/roles/energymon/files/values.yaml
 fi
 
+###########################################
+#          STEP 5: KubeVirt               #
+###########################################
+
+read -p "Do you want to install KubeVirt? (y/n) " choice
+if [[ "$choice" =~ ^[Yy]$ ]]; then
+    export INSTALL_KUBEVIRT=true
+else
+    export INSTALL_KUBEVIRT=false
+fi
+
 
 ######################################
-#   STEP 5: Start ansible script     #
+#   STEP 6: Start ansible script     #
 ######################################
 echo "Running Ansible script.."
 
@@ -280,7 +293,10 @@ echo "Running Ansible script.."
 echo "mgmt ALL=(ALL) NOPASSWD:ALL" | EDITOR='tee -a' visudo
 
 runuser -l mgmt -c 'ansible-galaxy collection install -r /home/mgmt/edge-infrastructure-ansible-main/requirements.yml'
-runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory'
+runuser -l mgmt -c "ansible-playbook \
+  /home/mgmt/edge-infrastructure-ansible-main/playbook/env_setup.yaml \
+  -e install_kubevirt=$INSTALL_KUBEVIRT \
+  -i /home/mgmt/edge-infrastructure-ansible-main/inventory"
 runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/dashboard_deploy.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory'
 
 if [ $# -eq 3 ]; then
@@ -288,8 +304,10 @@ if [ $# -eq 3 ]; then
   runuser -l mgmt -c 'ansible-playbook /home/mgmt/edge-infrastructure-ansible-main/playbook/liqo_outgoing_peering.yaml -i /home/mgmt/edge-infrastructure-ansible-main/inventory'
 fi
 
+
+
 ######################################
-#          STEP 6: Clean             #
+#          STEP 7: Clean             #
 ######################################
 while true; do
   read -p "Do you want to delete the ansible script located in /home/mgmt/edge-infrastructure-ansible-main? (y/n) " answer
@@ -310,7 +328,7 @@ while true; do
 done
 
 ################################################
-#          STEP 7: Password change             #
+#          STEP 8: Password change             #
 ################################################
 MGMT_USER_PSW_ASK_STRING="The user 'mgmt' has been created and used for the installation.
 The default password is: root
@@ -329,3 +347,4 @@ local_ip=$(hostname -I | awk '{print $1}')
 print_end_message "$local_ip" "$GRAFANA_PSW"
 echo ""
 echo "Installation completed."
+

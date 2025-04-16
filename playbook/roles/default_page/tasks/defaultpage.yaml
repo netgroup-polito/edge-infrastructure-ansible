@@ -38,3 +38,8 @@
   file:
     path: defaultpage-ingress.yaml
     state: absent
+
+- name: Remove default page local directory
+  ansible.builtin.file:
+    path: "./defaultpage"
+    state: absent
