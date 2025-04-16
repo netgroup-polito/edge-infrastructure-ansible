@@ -332,7 +332,7 @@ When enabled, the installation process includes the following steps:
    - Applying the necessary Custom Resource Definitions (CRDs), RBAC configurations, and deployment manifests.
    - Configuring priority classes and creating a service for the UI.
    - Deploying an Ingress resource (defined in `playbook/roles/kubevirt-setup/files/ingress.yaml`) to expose the KubeVirt Manager at the host `kubevirt.local`.
-   - Automatically adding an entry to the `/etc/hosts` file, mapping `kubevirt.local` to the local node's IP address.
+   - Automatically adding an entry to the `/etc/hosts` file, mapping `kubevirt.local` to the local node's IP address. Note: this step is required because of a bug in the KubeVirt Manager, as shown in the issue reported here: [https://github.com/kubevirt-manager/kubevirt-manager/issues/99](https://github.com/kubevirt-manager/kubevirt-manager/issues/99#issuecomment-2807348597)
 
 ### Enabling the Installation
 
