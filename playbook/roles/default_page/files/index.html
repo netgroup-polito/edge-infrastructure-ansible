@@ -42,9 +42,26 @@
             <p class="col text-center fw-medium"><a href="/prometheus/graph" title="Prometheus dashboard">Prometheus Dashboard</a></p>
         </div>
         <div class="row">
-            <p class="col text-center fw-medium"><a href="http://kubevirt.local" title="Kubvirt Manager">Kubvirt Dashboard</a></p>
+            <p class="col text-center fw-medium"><a href="#" id="kubevirt-nodeport" title="KubeVirt Manager">KubeVirt Dashboard</a></p>
         </div>
     </main>
+
+    <script>
+        // Get the KubeVirt link element
+        const kubevirtLink = document.getElementById('kubevirt-nodeport');
+        
+        // Function to update the KubeVirt link with the node IP and port
+        function updateKubeVirtLink() {
+            // Get the hostname (IP address)
+            const hostname = window.location.hostname;
+            
+            // Set the link URL to use the hostname and the NodePort
+            kubevirtLink.href = `http://${hostname}:30880`;
+        }
+        
+        // Call the function when the page loads
+        window.onload = updateKubeVirtLink;
+    </script>
  
 </body>
 

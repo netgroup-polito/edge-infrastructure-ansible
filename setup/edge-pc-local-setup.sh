@@ -129,7 +129,7 @@ print_end_message() {
         write_separate_line
         write_row "Dashboard" "URL" "Password"
         write_separate_line
-        write_row "General" "http://$1/default" "Not required"
+        write_row "General" "http://$1" "Not required"
         write_separate_line
         write_row "K3S" "http://$1/k3sdashboard" "Check README.md"
         write_separate_line
@@ -137,7 +137,7 @@ print_end_message() {
         write_separate_line
         write_row "Prometheus" "http://$1/prometheus/graph" "Not required"
         write_separate_line
-        write_row "KubeVirt" "http://kubevirt.local" "Not required"
+        write_row "KubeVirt" "http://$1:30880" "Not required"
         write_separate_line
 }
 

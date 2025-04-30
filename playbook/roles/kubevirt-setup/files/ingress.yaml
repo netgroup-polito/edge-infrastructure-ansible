@@ -5,6 +5,7 @@ metadata:
   namespace: kubevirt-manager
   annotations:
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: kubevirt.local
