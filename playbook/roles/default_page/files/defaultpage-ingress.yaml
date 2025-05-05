@@ -7,16 +7,27 @@ metadata:
     # Use the nginx ingress controller
     kubernetes.io/ingress.class: nginx
 
-    # Rewrite URLs such as /default/index.html into /index.html
+    # Rewrite URLs
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 
-    # Redirect /default to /default/ to ensure proper trailing slash
+    # Remove any redirect for root path
     nginx.ingress.kubernetes.io/configuration-snippet: |
+      # Only redirect /default without trailing slash
       rewrite ^(/default)$ $1/ redirect;
+
 spec:
   rules:
     - http:
         paths:
+          # Match the root path exactly
+          - path: /()(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: defaultpage-service
+                port:
+                  number: 8000
+          # Keep the /default path for backward compatibility
           - path: /default(/|$)(.*)
             pathType: Prefix
             backend:

@@ -88,7 +88,7 @@
 - name: "Create Service for KubeVirt Manager UI"
   kubernetes.core.k8s:
     state: present
-    src: "https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/service.yaml"
+    src: "roles/kubevirt-setup/files/service.yaml"
   tags:
     - kubevirt
 
@@ -99,20 +99,13 @@
   tags:
     - kubevirt
 
-# We tried exposing the KubeVirt Manager UI under a subpath (e.g., /kubevirt), like the other dashboards, 
-# but it caused routing issues and conflicts with existing UIs.
-# To avoid these conflicts and simplify access, the KubeVirt UI is exposed
-# through a dedicated hostname (kubevirt.local) and we need to add the
-# corresponding mapping to /etc/hosts via Ansible.
-# This way, the dashboard remains isolated and does not interfere with other services.
-- name: "Add kubevirt.local in /etc/hosts"
-  become: true
-  lineinfile:
-    path: /etc/hosts
-    regexp: '^.*kubevirt.local'
-    line: "{{ ansible_default_ipv4.address }} kubevirt.local"
-    state: present
+- name: "Wait for KubeVirt Manager service to be available"
+  shell: |
+    kubectl get svc -n kubevirt-manager kubevirt-manager -o jsonpath='{.spec.ports[0].nodePort}'
+  register: kubevirt_nodeport
+  retries: 10
+  delay: 5
+  until: kubevirt_nodeport.stdout != ""
   tags:
-      - kubevirt
-
+    - kubevirt
 

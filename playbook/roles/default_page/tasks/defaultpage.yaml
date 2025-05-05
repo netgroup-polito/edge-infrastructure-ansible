@@ -23,10 +23,19 @@
     src: defaultpage-ingress.yaml
     dest: "./defaultpage-ingress.yaml"
 
+- name: Delete existing defaultPage Ingress if it exists
+  ansible.builtin.command: kubectl delete ingress defaultpage-ingress -n default --ignore-not-found=true
+  register: delete_result
+  
+- name: Wait for ingress deletion to complete
+  ansible.builtin.pause:
+    seconds: 3
+  when: delete_result.rc == 0 and delete_result.stdout != ""
+
 - name: Apply Deployment File
   ansible.builtin.command: kubectl apply -f defaultpage-deployment.yaml
 
-- name: Apply DefaultPage Ingress
+- name: Apply Ingress Configuration File
   ansible.builtin.command: kubectl apply -f defaultpage-ingress.yaml
 
 - name: Clean Deployment File
