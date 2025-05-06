@@ -51,6 +51,29 @@ The second option could be useful for master node initialization, or if the user
 
 Once the installation terminates, a **web page** keeping the links to all dashboards present in the edge node is available at: __*http(s)://{edge node IP address}*__.
 
+### Cleaning up the installation
+
+If you need to uninstall all components and restore your system to its pre-installation state, a cleanup script is provided:
+
+```bash
+# Download the cleanup script
+curl https://raw.githubusercontent.com/netgroup-polito/edge-infrastructure-ansible/main/setup/edge-pc-cleanup.sh > edge-pc-cleanup.sh
+chmod +x edge-pc-cleanup.sh
+
+# Run the cleanup script
+sudo ./edge-pc-cleanup.sh
+```
+
+The cleanup script will:
+1. Uninstall K3s and remove its data directories
+2. Remove Helm, virtctl, and kubectl configurations
+3. Remove Ansible and Helm repositories
+4. Optionally remove the management user (mgmt)
+5. Clean up temporary files and system packages
+6. Reset IP tables rules
+
+The script will prompt for confirmation before making changes and includes options to customize the cleanup process.
+
 ## Manual installation (using individual ansible files, for expert users)
 Manual install is based on multiple Ansible files, which need to be launched individually.
 This provides more flexibility in the installation process, e.g., by enabling to customize some parameters (e.g., you can install a software locally or on a remote machine), and by selecting exactly which software has to be installed.
@@ -153,6 +176,21 @@ In order, it will:
 In the absence of an ingress for grafana, it is possible to expose and access grafana via nodeport with the following command:
 
 ```sudo kubectl expose service prometheus-grafana --type=NodePort --name=grafana-ext --target-port=3000 -n monitoring```
+
+The reason why we could not use the existing ingress is that:
+
+* Every service in the cluster has different routing requirements and path configurations  
+* The existing ingress might have other path configurations or annotations which would be in conflict with the requirements of Prometheus  
+* Prometheus has specific timeout settings and SSL configurations which might not be compatible with other services  
+* Having a separate ingress for Prometheus facilitates better isolation and easier management of its specific requirements without affecting other services  
+
+Having such separation of concerns between different ingress resources is commonly used in Kubernetes to:
+
+* Cleanly keep service boundaries intact  
+* Enable service-specific configurations  
+* Simplify managing and debugging each service separately  
+* Prevent configuration conflicts between various services  
+
 
 ### Grafana configuration
 
