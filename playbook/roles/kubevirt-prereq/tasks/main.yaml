@@ -11,13 +11,26 @@
   tags:
     - kubevirt
 
-- name: Ensure python3-kubernetes is installed on localhost
+- name: Try to install python3-kubernetes using apt
+  become: true
+  package:
+    name: python3-kubernetes
+    state: present
+  register: apt_install_result
+  ignore_errors: true
+  delegate_to: localhost
+  tags:
+    - kubevirt
+
+- name: Ensure python3-kubernetes is installed using pip with system-packages flag
   pip:
     name: kubernetes
     state: present
+    extra_args: --break-system-packages
   become: true
   vars:
     ansible_python_interpreter: /usr/bin/python3
+  when: apt_install_result is failed
   delegate_to: localhost
   tags:
     - kubevirt

@@ -49,6 +49,8 @@ prometheus:
     ingressClassName: nginx
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        rewrite ^(/prometheus)$ $1/ redirect;
 
     hosts: []
     # hosts:
@@ -78,8 +80,23 @@ prometheus:
   prometheusSpec:
     ## External URL at which Prometheus will be reachable.
     ##
-    externalUrl: ""
+    externalUrl: "/prometheus"
     ## Prefix used to register routes, overriding externalUrl route.
     ## Useful for proxies that rewrite URLs.
     ##
-    routePrefix: /
+    routePrefix: "/prometheus"
+    ## Port on which Prometheus is listening
+    ##
+    listenLocal: false
+    portName: http-web
+    containers:
+      - name: prometheus
+        ports:
+          - containerPort: 9090
+            name: http-web
+    service:
+      port: 9090
+      targetPort: 9090
+    # Ensure Prometheus is configured for the path
+    web:
+      path: "/prometheus"

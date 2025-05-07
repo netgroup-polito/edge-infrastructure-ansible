@@ -33,9 +33,18 @@
         state: latest
         update_cache: true
 
-    - name: Install Kubernetes Python module
+    - name: Install the Python client for kubernetes from apt
+      apt:
+        name: python3-kubernetes
+        state: present
+      register: apt_install_result
+      ignore_errors: true
+
+    - name: Install the python client for Kubernetes using pip with system-packages flag (this task is executed when the installation from apt fails)
       pip:
         name: kubernetes
+        extra_args: --break-system-packages
+      when: apt_install_result is failed
 
     - name: Create data directory on host
       file:
