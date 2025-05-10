@@ -6,5 +6,12 @@
 - name: Change ownership of k3s
   ansible.builtin.command: sudo chown mgmt /etc/rancher/k3s/k3s.yaml
 
-- name: Change access to k3s
+- name: Change access privileges to k3s kubeconfig```
   ansible.builtin.command: sudo chmod 644 /etc/rancher/k3s/k3s.yaml
+
+- name: Export KUBECONFIG in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml'
+    regexp: '^export KUBECONFIG='
+    state: present
