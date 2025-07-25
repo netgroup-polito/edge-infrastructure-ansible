@@ -1,44 +1,28 @@
 ---
 # This Ansible playbook installs the Liqo Dashboard on the cluster
 
-- name: Ensure git is installed
+- name: Apply Kubernetes metrics-server
   ansible.builtin.shell: |
-    if ! command -v git > /dev/null 2>&1; then
-      sudo apt update && sudo apt install -y git
-    fi
-  args:
-    executable: /bin/bash
+    kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
-- name: Clone LiqoDash repository
+- name: Clone ArubaKube Liqo Dashboard repository
   ansible.builtin.git:
-    repo: 'https://github.com/zankro/liqo-dashboard-test.git'
-    dest: '/tmp/dashboard'
+    repo: 'https://github.com/ArubaKube/liqo-dashboard.git'
+    dest: '/tmp/liqo-dashboard'
     version: 'main'
+    force: yes
 
-- name: Install LiqoDash with Helm using shell command
+- name: Install Liqo Dashboard with Helm
   ansible.builtin.shell: |
-    helm install liqo-dashboard /tmp/dashboard/chart \
+    helm install my-release /tmp/liqo-dashboard/deployments/liqo-dashboard \
       --kubeconfig /etc/rancher/k3s/k3s.yaml \
-      --namespace default \
-      --set backend.imageName="andreacv98/liqo-dashboard-backend" \
-      --set frontend.imageName="andreacv98/liqo-dashboard-frontend" \
-      --set image.tag="0.0.1"
+      --set ingress.enabled=true \
+      --set ingress.ingressClassName=nginx
 
-- name: Delete default LiqoDash ingress if exists
+- name: Get ingress nginx controller IP and add to /etc/hosts
   ansible.builtin.shell: |
-    kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml delete ingress liqo-dashboard-ingress --ignore-not-found=true
-
-- name: Copy Ingress Configuration File in home directory
-  ansible.builtin.copy:
-    src: ingress.yaml
-    dest: "./liqo-ingress.yaml"
-    mode: "0644"
-
-- name: Apply Ingress Configuration YAML File
-  ansible.builtin.shell: |
-    kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f ./liqo-ingress.yaml
-
-- name: Delete Ingress Configuration File Previously Copied
-  ansible.builtin.file:
-    path: liqo-ingress.yaml
-    state: absent
+    INGRESS_IP=$(kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    if [ ! -z "$INGRESS_IP" ]; then
+      echo "$INGRESS_IP liqo-dashboard.local" >> /etc/hosts
+    fi
+  become: yes

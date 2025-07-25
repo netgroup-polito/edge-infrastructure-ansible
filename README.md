@@ -163,7 +163,34 @@ sudo kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.t
 The dashboard is reachable via both HTTP and HTTPS at the address __*http(s)://{node IP address}/dashboard*__ thanks to the **LoadBalancer service**.
 For instance, if the IP address of your edge node is 192.168.1.2, the dashboard will be reached at https://192.168.1.2/dashboard.
 
-###### This playbook installs also the Liqo Dashboard (to be reviewed)
+## Accessing Liqo Dashboard Locally
+
+To open the Liqo Dashboard on your own machine, follow these steps:
+
+### Step 1: Get the External IP Address
+
+Run this command to get the external IP of the `ingress-nginx-controller` service in the `ingress-nginx` namespace:
+
+```bash
+kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+```
+
+### Step 2: Add the External IP to Your /etc/hosts File
+Replace <External-IP-Address> with the IP you obtained in Step 1 and run:
+
+```bash
+sudo sh -c "echo '<External-IP-Address> liqo-dashboard.local' >> /etc/hosts"
+```
+
+This maps liqo-dashboard.local to the external IP address.
+
+### Step 3: Access the Liqo Dashboard
+Open your browser and navigate to:
+
+http://liqo-dashboard.local
+
+Or use the default webpage and click on "Liqo" link.
+
 
 ## Energy monitoring
 The ```energymon``` role is responsible for installing and configuring the monitoring part.
